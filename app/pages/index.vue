@@ -5,11 +5,8 @@ useHead({
   title: 'Phase 0 · Infrastructure Check'
 })
 
-const api = useApi()
-
-const { data, error, status, refresh } = await useAsyncData(
-  'healthz',
-  () => api.get<HealthzResponse>('/vl/v1/healthz'),
+const { data, error, status, refresh } = await useApiFetch<HealthzResponse>(
+  '/vl/v1/healthz',
   { server: false } // client-only: easier to inspect CORS preflight in browser devtools
 )
 </script>
