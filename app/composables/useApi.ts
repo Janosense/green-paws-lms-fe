@@ -8,9 +8,18 @@ type ApiBody = ApiFetchOptions['body']
 
 function normalizeFetchError(ctx: FetchContext): ApiError {
   const status = ctx.response?.status ?? 0
-  const data = ctx.response?._data
 
-  // WP REST API standard error shape: { code, message, data: { status } }
+  // No response = network-level failure (DNS, CORS, offline, connection refused)
+  if (!ctx.response) {
+    return {
+      code: 'network_error',
+      message: ctx.error?.message || 'Unable to reach the API. Is the backend running?',
+      status: 0
+    }
+  }
+
+  const data = ctx.response._data
+
   if (data && typeof data === 'object' && 'code' in data && 'message' in data) {
     return {
       code: String(data.code),
@@ -20,9 +29,10 @@ function normalizeFetchError(ctx: FetchContext): ApiError {
     }
   }
 
+  // Got a response but not WP-shaped (e.g. 500 HTML error page, nginx 502)
   return {
-    code: 'network_error',
-    message: ctx.error?.message || 'Network request failed',
+    code: `http_${status}`,
+    message: `Request failed with status ${status}`,
     status
   }
 }
