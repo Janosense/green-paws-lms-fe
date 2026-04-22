@@ -1,64 +1,103 @@
-# Nuxt Starter Template
+# vl-frontend
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+Nuxt 4 frontend for the **Green Paws LMS** — a headless learning management system for
+veterinarians. Talks to a WordPress backend (`green-paws-lms-backend`) over the REST API
+using JWT auth.
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+This branch is **Phase 0 (Infrastructure)**. It proves end-to-end connectivity to the
+backend with a single smoke-test page hitting `/vl/v1/healthz`. Visual theming
+(brand colors, fonts, radii) is intentionally deferred to a later "theme setup" pass —
+Phase 0 uses Nuxt UI's default look.
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
+## Prerequisites
 
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png" width="830" height="466">
-  </picture>
-</a>
+- Node.js **20+**
+- npm **10+**
+- [DDEV](https://ddev.readthedocs.io/) running the `green-paws-lms-backend` project
+- Backend plugins active: `vl-lms`, `vl-jwt-auth`
+- Backend mu-plugin present: `vl-cors.php`
+- `VL_CORS_ORIGINS` constant in backend `wp-config.php` includes `http://localhost:3000`:
 
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
-
-## Quick Start
-
-```bash [Terminal]
-npm create nuxt@latest -- -t ui
-```
-
-## Deploy your own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
+  ```php
+  define('VL_CORS_ORIGINS', 'http://localhost:3000');
+  ```
 
 ## Setup
 
-Make sure to install the dependencies:
-
 ```bash
-pnpm install
+npm install
+cp .env.example .env   # adjust URLs if your DDEV site uses a different hostname
+npm run dev
 ```
 
-## Development Server
+Then open <http://localhost:3000>.
 
-Start the development server on `http://localhost:3000`:
+## Smoke test
 
-```bash
-pnpm dev
+The home page (`/`) fetches `GET {NUXT_PUBLIC_WP_API_BASE}/vl/v1/healthz` from the
+browser (client-only) and renders the result. Success looks like a green **ok** badge
+with the backend version and an ISO timestamp.
+
+You can verify the full chain in your browser devtools:
+
+1. Network → `healthz` → **OPTIONS** preflight returns `204`.
+2. The follow-up **GET** returns `200` with `{ status: "ok", version, timestamp }`.
+3. The card on the page shows the `ok` badge.
+4. The **Refresh** button re-triggers the request.
+
+## Scripts
+
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start dev server on `http://localhost:3000` |
+| `npm run build` | Production build |
+| `npm run generate` | Static site generation |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint with `--fix` |
+| `npm run typecheck` | Run `nuxt typecheck` (vue-tsc) |
+
+## Project structure
+
+```
+app/
+  app.vue           # Root, wraps <UApp>
+  assets/css/       # Tailwind + Nuxt UI imports (no custom tokens yet)
+  components/       # (empty — filled in later phases)
+  composables/
+    useApi.ts       # HTTP client wrapper, WP-REST error normalization
+  layouts/
+    default.vue     # Minimal shell
+  middleware/       # (empty — auth middleware lands in Phase 2)
+  pages/
+    index.vue       # Smoke test page
+  plugins/          # (empty)
+shared/
+  types/api.ts      # API contract types (ApiEnvelope, ApiError, HealthzResponse)
+server/             # Reserved — no BFF routes in Phase 0
 ```
 
-## Production
+`shared/` is a Nuxt 4 convention for code reachable from both `app/` and `server/`.
 
-Build the application for production:
+## Troubleshooting
 
-```bash
-pnpm build
-```
+- **CORS preflight fails** (`OPTIONS` returns 4xx, or browser blocks the request):
+  check that the backend `wp-config.php` defines
+  `VL_CORS_ORIGINS` and that it includes `http://localhost:3000`.
+- **SSL certificate error when fetching the backend**: DDEV uses `mkcert`.
+  If the system trust store is missing the DDEV CA, run `mkcert -install`
+  on the machine hosting the backend.
+- **`404` on `/vl/v1/healthz`**: confirm both the `vl-lms` plugin **and** its dependency
+  `vl-jwt-auth` are active in WordPress.
+- **`.env` URL mismatch**: confirm the DDEV project URL with `ddev describe`
+  in the backend directory, then align `NUXT_PUBLIC_WP_API_BASE` in `.env`.
+- **Network error with no status code**: the backend is most likely not running —
+  `ddev status` to check, `ddev start` to bring it up.
 
-Locally preview production build:
+## Notes
 
-```bash
-pnpm preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-
-## Renovate integration
-
-Install [Renovate GitHub app](https://github.com/apps/renovate/installations/select_target) on your repository and you are good to go.
+- **Theming comes later.** Brand colors, fonts, radius tokens, and the `app.config.ts`
+  color overrides will be added in a separate pass. Phase 0 deliberately keeps
+  `main.css` minimal (two imports) and ships with Nuxt UI defaults.
+- **Auth comes in Phase 2.** `useApi` is the seam where JWT header injection and the
+  `401` refresh flow will plug in.
