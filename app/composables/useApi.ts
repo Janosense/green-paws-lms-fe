@@ -39,7 +39,7 @@ function normalizeFetchError(ctx: FetchContext): ApiError {
 
 type SharedApiFetchOptions = Pick<
   FetchOptions,
-  'baseURL' | 'headers' | 'onRequest' | 'onRequestError' | 'onResponseError'
+  'baseURL' | 'onRequest' | 'onRequestError' | 'onResponseError'
 >
 
 /**
@@ -57,12 +57,12 @@ function buildApiFetchOptions(): SharedApiFetchOptions {
 
   return {
     baseURL,
-    headers: { Accept: 'application/json' },
 
-    onRequest(_ctx) {
+    onRequest(ctx) {
+      ctx.options.headers.set('Accept', 'application/json')
       // TODO (Phase 2): inject `Authorization: Bearer <token>` from auth store.
       //   const auth = useAuthStore()
-      //   if (auth.token) _ctx.options.headers.set('Authorization', `Bearer ${auth.token}`)
+      //   if (auth.token) ctx.options.headers.set('Authorization', `Bearer ${auth.token}`)
     },
 
     onRequestError(ctx) {
@@ -82,17 +82,10 @@ function buildApiFetchOptions(): SharedApiFetchOptions {
  * Use in <script setup> for GETs that should participate in the payload:
  *   const { data, error, refresh } = await useApiFetch<HealthzResponse>('/vl/v1/healthz')
  */
-export const useApiFetch = createUseFetch((currentOptions) => {
-  const base = buildApiFetchOptions()
-  return {
-    ...base,
-    ...currentOptions,
-    headers: {
-      ...(base.headers as Record<string, string>),
-      ...(currentOptions.headers as Record<string, string> | undefined)
-    }
-  }
-})
+export const useApiFetch = createUseFetch((currentOptions) => ({
+  ...buildApiFetchOptions(),
+  ...currentOptions
+}))
 
 /**
  * Imperative client for mutations (POST/PUT/PATCH/DELETE) and one-shot calls
