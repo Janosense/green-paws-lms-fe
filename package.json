@@ -24,7 +24,10 @@
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
+    "@iconify-json/tabler": "^1.2.33",
     "@nuxt/eslint": "^1.15.2",
+    "@nuxt/fonts": "^0.14.0",
+    "@nuxtjs/color-mode": "^4.0.0",
     "eslint": "^10.2.0",
     "typescript": "^6.0.2",
     "vue-tsc": "^3.2.6"

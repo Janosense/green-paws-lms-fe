@@ -1,2 +1,87 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+@theme static {
+  /* ──────────────────────────────────────────────────────────
+     Brand — forest green, 11 steps, anchor at 600 = #397E49
+     ────────────────────────────────────────────────────────── */
+  --color-brand-50:  #EDF5EF;
+  --color-brand-100: #D7EADC;
+  --color-brand-200: #B2D5BB;
+  --color-brand-300: #84B892;
+  --color-brand-400: #5A9B6A;
+  --color-brand-500: #418751;
+  --color-brand-600: #397E49;
+  --color-brand-700: #2E6B3C;
+  --color-brand-800: #265530;
+  --color-brand-900: #1E4127;
+  --color-brand-950: #0F2415;
+
+  /* ──────────────────────────────────────────────────────────
+     Neutral — warm stone (overrides Tailwind default stone)
+     ────────────────────────────────────────────────────────── */
+  --color-stone-50:  #FAF8F4;
+  --color-stone-100: #F2EEE6;
+  --color-stone-200: #E3DBCB;
+  --color-stone-300: #D1C5AE;
+  --color-stone-400: #B7A88A;
+  --color-stone-500: #96876B;
+  --color-stone-600: #756853;
+  --color-stone-700: #554C3C;
+  --color-stone-800: #3B352B;
+  --color-stone-900: #26221C;
+  --color-stone-950: #17140F;
+
+  /* ──────────────────────────────────────────────────────────
+     Typography
+     ────────────────────────────────────────────────────────── */
+  --font-sans:  'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono:  ui-monospace, 'JetBrains Mono', 'Cascadia Mono', monospace;
+
+  /* ──────────────────────────────────────────────────────────
+     Radius
+     ────────────────────────────────────────────────────────── */
+  --radius-sm: 0.25rem;   /* 4px  — badges, tags, progress tracks */
+  --radius-md: 0.375rem;  /* 6px  — buttons, inputs, selects */
+  --radius-lg: 0.625rem;  /* 10px — cards, panels */
+  --radius-xl: 1rem;      /* 16px — feature cards, modals, sheets */
+
+  /* ──────────────────────────────────────────────────────────
+     Shadow — warm-tinted, functional only
+     ────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px 0 rgb(38 34 28 / 0.06);
+  --shadow-md: 0 4px 12px -2px rgb(38 34 28 / 0.08);
+  --shadow-lg: 0 12px 32px -8px rgb(38 34 28 / 0.16);
+
+  /* ──────────────────────────────────────────────────────────
+     Motion
+     ────────────────────────────────────────────────────────── */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+
+  /* ──────────────────────────────────────────────────────────
+     Focus ring
+     ────────────────────────────────────────────────────────── */
+  --color-ring:               var(--color-brand-500);
+  --default-ring-width:        2px;
+  --default-ring-offset-width: 2px;
+}
+
+/* Dark mode overrides (class-based, toggled by @nuxtjs/color-mode) */
+.dark {
+  --color-ring: var(--color-brand-400);
+}
+
+/* Reduced motion — globally neutralize animation durations */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+}

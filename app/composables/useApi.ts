@@ -82,7 +82,7 @@ function buildApiFetchOptions(): SharedApiFetchOptions {
  * Use in <script setup> for GETs that should participate in the payload:
  *   const { data, error, refresh } = await useApiFetch<HealthzResponse>('/vl/v1/healthz')
  */
-export const useApiFetch = createUseFetch((currentOptions) => ({
+export const useApiFetch = createUseFetch(currentOptions => ({
   ...buildApiFetchOptions(),
   ...currentOptions
 }))

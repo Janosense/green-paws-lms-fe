@@ -3,6 +3,8 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxt/ui',
+    '@nuxt/fonts',
+    '@nuxtjs/color-mode',
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/eslint'
@@ -28,6 +30,13 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  colorMode: {
+    preference: 'light',
+    fallback: 'light',
+    storageKey: 'vl-color-mode',
+    classSuffix: ''
+  },
+
   runtimeConfig: {
     // Server-only (SSR). Empty in Phase 0, reserved for future internal URLs.
     wpApiBaseInternal: '',
@@ -52,5 +61,23 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  fonts: {
+    families: [
+      {
+        name: 'Onest',
+        provider: 'google',
+        weights: [400, 500, 600, 700],
+        subsets: ['cyrillic', 'latin']
+      },
+      {
+        name: 'Source Serif 4',
+        provider: 'google',
+        weights: [400, 600],
+        styles: ['normal', 'italic'],
+        subsets: ['cyrillic', 'latin']
+      }
+    ]
   }
 })
