@@ -33,7 +33,7 @@ async function onSubmit(event: FormSubmitEvent<LoginFormValues>) {
       username: event.data.email,
       password: event.data.password
     })
-    const target = safeRedirectTarget(route.query.redirect, '/account')
+    const target = safeRedirectTarget(route.query.return_to, '/account')
     await navigateTo(target)
   } catch (error) {
     if (isApiError(error)) {

@@ -4,7 +4,7 @@
  *
  * Pure routing — depends on the auth store hydrated by the boot plugin.
  * Unauthenticated callers are bounced to /login with the original path
- * preserved as `?redirect=` for post-login return.
+ * preserved as `?return_to=` for post-login return.
  */
 export default defineNuxtRouteMiddleware((to) => {
   const authStore = useAuthStore()
@@ -13,6 +13,10 @@ export default defineNuxtRouteMiddleware((to) => {
     return
   }
 
-  const target = `/login?redirect=${encodeURIComponent(to.fullPath)}`
+  if (to.path === '/login') {
+    return
+  }
+
+  const target = `/login?return_to=${encodeURIComponent(to.fullPath)}`
   return navigateTo(target)
 })
