@@ -42,6 +42,68 @@
     "welcome_back_title": "Раді вас бачити знову",
     "go_to_account": "Перейти до акаунту"
   },
+  "catalog": {
+    "courses": {
+      "title": "Курси",
+      "meta_description": "Каталог курсів для ветеринарів — фільтри за спеціалізацією, рівнем складності, категоріями.",
+      "empty": {
+        "title": "Нічого не знайдено",
+        "description": "Спробуйте змінити фільтри або очистити пошук."
+      }
+    },
+    "webinars": {
+      "title": "Вебінари",
+      "meta_description": "Каталог вебінарів для ветеринарів — фільтри за спеціалізацією, рівнем складності, категоріями.",
+      "empty": {
+        "title": "Нічого не знайдено",
+        "description": "Спробуйте змінити фільтри або очистити пошук."
+      }
+    },
+    "results_count": "Знайдено {count}",
+    "filters": {
+      "title": "Фільтри",
+      "search": {
+        "placeholder": "Пошук…"
+      },
+      "clear_all": "Очистити все",
+      "clear_filters": "Очистити фільтри",
+      "no_options": "Немає опцій",
+      "taxonomies": {
+        "vl_category": "Категорії",
+        "vl_specialty": "Спеціалізація",
+        "vl_difficulty": "Рівень",
+        "vl_tag": "Теги"
+      }
+    },
+    "sort": {
+      "label": "Сортування",
+      "options": {
+        "newest": "Найновіші",
+        "oldest": "Найстаріші",
+        "title_asc": "За назвою А-Я",
+        "title_desc": "За назвою Я-А",
+        "upcoming": "Майбутні"
+      }
+    },
+    "error": {
+      "title": "Не вдалося завантажити",
+      "description": "Перевірте з'єднання та спробуйте ще раз.",
+      "retry": "Спробувати ще раз"
+    },
+    "card": {
+      "free": "Безкоштовно",
+      "registration_closed": "Реєстрація закрита",
+      "duration_unit_hours": "год",
+      "duration_unit_minutes": "хв",
+      "completed_prefix": "Завершено",
+      "webinar_status": {
+        "scheduled": "Незабаром",
+        "live": "У ефірі",
+        "completed": "Завершено",
+        "cancelled": "Скасовано"
+      }
+    }
+  },
   "auth": {
     "login": {
       "title": "Вхід",
