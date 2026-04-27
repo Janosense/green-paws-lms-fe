@@ -242,6 +242,110 @@
       "token_required": "Посилання недійсне."
     }
   },
+  "landing": {
+    "course": {
+      "cta": {
+        "enroll": "Записатися на курс",
+        "closed": "Реєстрація закрита"
+      },
+      "type": {
+        "self_paced": "Самостійне навчання",
+        "cohort": "Групове навчання"
+      },
+      "section": {
+        "about": "Про курс",
+        "curriculum": {
+          "title": "Програма курсу",
+          "empty": "Програма буде додана пізніше.",
+          "orphan_heading": "Окремі уроки"
+        },
+        "instructors": "Викладачі",
+        "details": "Деталі"
+      },
+      "detail": {
+        "type": "Тип",
+        "duration": "Тривалість",
+        "difficulty": "Складність",
+        "certificate": "Сертифікат",
+        "certificate_yes_with_threshold": "Так, прохідний бал {threshold}%",
+        "certificate_yes": "Так",
+        "certificate_no": "Ні",
+        "starts_at": "Старт",
+        "ends_at": "Завершення",
+        "enrollment_opens_at": "Початок реєстрації",
+        "enrollment_closes_at": "Закінчення реєстрації",
+        "categories": "Категорії",
+        "specialties": "Спеціалізації",
+        "tags": "Теги",
+        "max_students": "До {count} студентів"
+      },
+      "cohort_secondary": {
+        "starts_at": "Старт {date}",
+        "enrollment_closes_at": "Закінчення реєстрації {date}"
+      },
+      "self_paced_secondary": "Постійний доступ після покупки",
+      "about_empty": "Опис буде додано пізніше.",
+      "lesson": {
+        "preview_tooltip": "Доступно без запису"
+      },
+      "lessons_count": "{count} уроків"
+    },
+    "webinar": {
+      "cta": {
+        "register": "Зареєструватися",
+        "closed": "Реєстрація закрита",
+        "completed": "Подія завершена",
+        "cancelled": "Подію скасовано",
+        "live": "Триває зараз"
+      },
+      "section": {
+        "about": "Про вебінар",
+        "materials": "Матеріали",
+        "instructors": "Викладачі",
+        "details": "Деталі"
+      },
+      "detail": {
+        "date": "Дата",
+        "duration": "Тривалість",
+        "recording_label": "Запис",
+        "recording_yes": "Так, доступний {days} днів",
+        "recording_no": "Ні",
+        "registration": "Реєстрація",
+        "categories": "Категорії",
+        "specialties": "Спеціалізації",
+        "tags": "Теги"
+      },
+      "recording_badge": "Запис {days} днів"
+    },
+    "instructor": {
+      "role": {
+        "lead": "Провідний викладач",
+        "co_instructor": "Співвикладач"
+      }
+    },
+    "breadcrumbs": {
+      "home": "Головна",
+      "courses": "Курси",
+      "webinars": "Вебінари"
+    },
+    "toast": {
+      "enroll_soon": {
+        "title": "Скоро буде",
+        "description_course": "Реєстрація на курс відкриється у Phase 4.",
+        "description_webinar": "Реєстрація на вебінари відкриється у Phase 7."
+      }
+    },
+    "relative_date": {
+      "today": "Сьогодні",
+      "tomorrow": "Завтра",
+      "days_future": "Через {days} днів",
+      "days_past": "{days} днів тому"
+    },
+    "duration": {
+      "hours_short": "год",
+      "minutes_short": "хв"
+    }
+  },
   "errors": {
     "network_error": "Не вдалося звʼязатися із сервером. Перевірте інтернет-зʼєднання.",
     "unknown_error": "Сталася непередбачена помилка. Спробуйте ще раз пізніше.",

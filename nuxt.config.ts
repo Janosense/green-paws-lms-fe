@@ -48,6 +48,13 @@ export default defineNuxtConfig({
       wpAuthBase: ''
     }
   },
+
+  // Phase 3.4: 5min SWR for landing pages — content is editorial and changes infrequently.
+  routeRules: {
+    '/courses/**': { swr: 300 },
+    '/webinars/**': { swr: 300 }
+  },
+
   compatibilityDate: '2026-04-22',
 
   typescript: {

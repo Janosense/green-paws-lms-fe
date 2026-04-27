@@ -104,3 +104,111 @@ export type CatalogSort
     | 'upcoming'
 
 export type CatalogType = 'courses' | 'webinars'
+
+/* ------------------------------------------------------------------------ *
+ * Detail-level types — Phase 3.4. Detail responses extend card shapes with
+ * full content, instructors with bios, schedule fields, curriculum, and an
+ * SEO block driven server-side from the post excerpt + cover.
+ * ------------------------------------------------------------------------ */
+
+export interface DetailInstructor {
+  id: number
+  display_name: string
+  role_in_course: 'lead' | 'co_instructor'
+  avatar: { url: string, size: number }
+  bio: string
+}
+
+export interface DetailMaterial {
+  url: string
+  name: string
+  size: number
+}
+
+export interface CurriculumLesson {
+  id: number
+  title: string
+  duration_seconds: number
+  is_preview: boolean
+}
+
+export interface CurriculumModule {
+  id: number
+  title: string
+  duration_minutes: number
+  passing_threshold: number | null
+  intro_video_url: string
+  lessons: CurriculumLesson[]
+}
+
+export interface Curriculum {
+  modules: CurriculumModule[]
+  orphan_lessons: CurriculumLesson[]
+}
+
+export interface SeoBlock {
+  title: string
+  description: string
+  og_image: string | null
+  canonical_path: string
+}
+
+export interface CourseDetail {
+  id: number
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  type: 'self_paced' | 'cohort'
+  duration_hours: number
+  price: number
+  currency: string
+  enrollment_open: boolean
+  enrollment_opens_at: string | null
+  enrollment_closes_at: string | null
+  starts_at: string | null
+  ends_at: string | null
+  max_students: number
+  preview_video_url: string
+  certificate_enabled: boolean
+  passing_threshold: number | null
+  difficulty: CardTerm | null
+  categories: CardTerm[]
+  specialties: CardTerm[]
+  tags: CardTerm[]
+  cover: CardCover | null
+  instructors: DetailInstructor[]
+  curriculum: Curriculum
+  seo: SeoBlock
+}
+
+export interface WebinarDetail {
+  id: number
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  scheduled_start: string | null
+  scheduled_end: string | null
+  status: WebinarStatus
+  price: number
+  currency: string
+  max_attendees: number
+  registration_opens_at: string | null
+  registration_closes_at: string | null
+  registration_open: boolean
+  preview_video_url: string
+  recording_offered: boolean
+  recording_access_days: number
+  materials: DetailMaterial[]
+  difficulty: CardTerm | null
+  categories: CardTerm[]
+  specialties: CardTerm[]
+  tags: CardTerm[]
+  cover: CardCover | null
+  instructors: DetailInstructor[]
+  seo: SeoBlock
+}
+
+export type CourseDetailResponse = ApiEnvelope<CourseDetail>
+export type WebinarDetailResponse = ApiEnvelope<WebinarDetail>
