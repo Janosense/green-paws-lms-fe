@@ -55,7 +55,7 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
   <header class="sticky top-0 z-40 border-b border-default bg-default/95 backdrop-blur">
     <UContainer class="h-14 flex items-center justify-between gap-4">
       <div class="flex items-center gap-6">
-        <AppWordmark size="text-lg" />
+        <AppWordmark size="h-8" />
         <nav class="hidden md:flex items-center gap-1">
           <UButton
             to="/courses"

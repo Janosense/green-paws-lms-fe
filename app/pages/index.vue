@@ -13,7 +13,7 @@ const authStore = useAuthStore()
   <UContainer class="py-16">
     <div class="max-w-2xl mx-auto space-y-8 text-center">
       <AppWordmark
-        size="text-4xl sm:text-5xl"
+        size="h-20 sm:h-28"
         :link="false"
       />
 
