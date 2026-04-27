@@ -5,6 +5,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxt/fonts',
     '@nuxtjs/color-mode',
+    '@nuxtjs/i18n',
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/eslint'
@@ -77,6 +78,19 @@ export default defineNuxtConfig({
         weights: [400, 600],
         styles: ['normal', 'italic'],
         subsets: ['cyrillic', 'latin']
+      }
+    ]
+  },
+
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'uk',
+    locales: [
+      {
+        code: 'uk',
+        language: 'uk-UA',
+        name: 'Українська',
+        file: 'uk.json'
       }
     ]
   }

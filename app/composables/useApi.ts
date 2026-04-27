@@ -2,7 +2,17 @@ import type { FetchContext, FetchOptions } from 'ofetch'
 import type { NitroFetchOptions, NitroFetchRequest } from 'nitropack/types'
 import type { ApiError } from '#shared/types/api'
 
-type ApiFetchOptions = NitroFetchOptions<NitroFetchRequest>
+/**
+ * Internal extension over Nitro's fetch options:
+ * - `auth: false` opts a request out of `Authorization: Bearer` injection
+ *   (used by /vl-auth/v1/token, /token/refresh, /vl/v1/auth/* public flows).
+ * - `__retried: true` is the sentinel that marks the second pass after a
+ *   refresh-and-retry, so a recursive 401 does not loop.
+ */
+type ApiFetchOptions = NitroFetchOptions<NitroFetchRequest> & {
+  auth?: boolean
+  __retried?: boolean
+}
 type ApiCallOptions = Omit<ApiFetchOptions, 'method'>
 type ApiBody = ApiFetchOptions['body']
 
@@ -20,6 +30,25 @@ function normalizeFetchError(ctx: FetchContext): ApiError {
 
   const data = ctx.response._data
 
+  // vl-auth/v1 (vl-jwt-auth) envelope: { success: false, error: { code, message, status } }
+  if (
+    data
+    && typeof data === 'object'
+    && 'error' in data
+    && data.error
+    && typeof data.error === 'object'
+    && 'code' in data.error
+    && 'message' in data.error
+  ) {
+    const err = data.error as { code: unknown, message: unknown }
+    return {
+      code: String(err.code),
+      message: String(err.message),
+      status
+    }
+  }
+
+  // WP-REST default envelope (vl-lms /vl/v1/auth/*): { code, message, data: { status } }
   if (data && typeof data === 'object' && 'code' in data && 'message' in data) {
     return {
       code: String(data.code),
@@ -29,7 +58,7 @@ function normalizeFetchError(ctx: FetchContext): ApiError {
     }
   }
 
-  // Got a response but not WP-shaped (e.g. 500 HTML error page, nginx 502)
+  // Got a response but not a recognised envelope (e.g. 500 HTML page, nginx 502)
   return {
     code: `http_${status}`,
     message: `Request failed with status ${status}`,
@@ -39,13 +68,18 @@ function normalizeFetchError(ctx: FetchContext): ApiError {
 
 type SharedApiFetchOptions = Pick<
   FetchOptions,
-  'baseURL' | 'onRequest' | 'onRequestError' | 'onResponseError'
+  'baseURL' | 'credentials' | 'onRequest' | 'onRequestError' | 'onResponseError'
 >
 
 /**
- * Single source of truth for API fetch configuration.
- * Resolves baseURL (internal on SSR, public elsewhere) and installs the
- * interceptor seams that Phase 2 auth will plug into.
+ * Single source of truth for API fetch configuration shared between
+ * `useApi()` (imperative) and `useApiFetch` (declarative). Header injection,
+ * SSR cookie passthrough, and error normalization live here. The 401
+ * refresh-and-retry layer is added on top by `createApiFetch()` below.
+ *
+ * `credentials: 'include'` is set globally so the path-scoped refresh cookie
+ * attaches to /vl-auth/v1/* calls. The cookie is path-scoped on the backend
+ * (see PHASE-2-AUDIT §3) so it never leaks to /vl/v1/* endpoints.
  */
 function buildApiFetchOptions(): SharedApiFetchOptions {
   const config = useRuntimeConfig()
@@ -57,12 +91,33 @@ function buildApiFetchOptions(): SharedApiFetchOptions {
 
   return {
     baseURL,
+    credentials: 'include',
 
     onRequest(ctx) {
       ctx.options.headers.set('Accept', 'application/json')
-      // TODO (Phase 2): inject `Authorization: Bearer <token>` from auth store.
-      //   const auth = useAuthStore()
-      //   if (auth.token) ctx.options.headers.set('Authorization', `Bearer ${auth.token}`)
+
+      // SSR: the browser is not in the loop, so the refresh cookie lives in
+      // the incoming request headers. Forward it on outgoing API calls so
+      // /vl-auth/v1/refresh and /logout still see it.
+      if (import.meta.server) {
+        const incoming = useRequestHeaders(['cookie'])
+        if (incoming.cookie && !ctx.options.headers.has('cookie')) {
+          ctx.options.headers.set('cookie', incoming.cookie)
+        }
+      }
+
+      const opts = ctx.options as ApiFetchOptions
+      if (opts.auth !== false) {
+        const authStore = useAuthStore()
+        const token = authStore.accessToken?.value
+        if (token) {
+          ctx.options.headers.set('Authorization', `Bearer ${token}`)
+        }
+      }
+
+      // `auth` and `__retried` are wrapper-internal flags — strip them so
+      // they never reach the underlying Fetch call.
+      delete opts.auth
     },
 
     onRequestError(ctx) {
@@ -70,9 +125,58 @@ function buildApiFetchOptions(): SharedApiFetchOptions {
     },
 
     onResponseError(ctx) {
-      // TODO (Phase 2): on 401, attempt token refresh + retry once before throwing.
-      //   if (ctx.response.status === 401) { await auth.refresh(); return retry(ctx) }
       throw normalizeFetchError(ctx)
+    }
+  }
+}
+
+type ApiClientFetch = <T>(request: NitroFetchRequest, options?: ApiFetchOptions) => Promise<T>
+
+/**
+ * Build a fetch function that adds 401 refresh-and-retry on top of the
+ * shared interceptor pipeline. Concurrent 401s are coalesced through the
+ * auth store's single-flight `refresh()`, so N parallel requests trigger
+ * exactly one /token/refresh round-trip.
+ *
+ * Retry happens at the wrapper layer (rather than inside `onResponseError`)
+ * because ofetch always throws after `onResponseError` resolves — there is
+ * no supported way to swap a failed response with a successful retry from
+ * inside the interceptor itself. The shared interceptor still normalizes
+ * the error; we only inspect its status here.
+ */
+function createApiFetch(): ApiClientFetch {
+  const baseFetch = $fetch.create(buildApiFetchOptions())
+
+  return async <T>(request: NitroFetchRequest, options: ApiFetchOptions = {}): Promise<T> => {
+    try {
+      return await baseFetch<T>(request, options as NitroFetchOptions<NitroFetchRequest>)
+    } catch (error) {
+      const apiError = error as ApiError
+      const canRetry
+        = apiError?.status === 401
+          && options.auth !== false
+          && options.__retried !== true
+
+      if (!canRetry) {
+        throw error
+      }
+
+      const authStore = useAuthStore()
+      try {
+        await authStore.refresh()
+      } catch {
+        // Refresh failed: the store has cleared its own state. Surface the
+        // original 401 to the caller and, on the client, kick the user back
+        // to /login. SSR has no router redirect target here — the page
+        // render will surface the auth-less state via the boot plugin.
+        if (import.meta.client) {
+          await navigateTo('/login')
+        }
+        throw error
+      }
+
+      const retryOptions = { ...options, __retried: true }
+      return await baseFetch<T>(request, retryOptions as NitroFetchOptions<NitroFetchRequest>)
     }
   }
 }
@@ -89,10 +193,10 @@ export const useApiFetch = createUseFetch(currentOptions => ({
 
 /**
  * Imperative client for mutations (POST/PUT/PATCH/DELETE) and one-shot calls
- * from event handlers or form submits — anywhere outside the useFetch flow.
+ * from event handlers, store actions, or anywhere outside the useFetch flow.
  */
 export function useApi() {
-  const apiFetch = $fetch.create(buildApiFetchOptions())
+  const apiFetch = createApiFetch()
 
   return {
     get: <T>(path: string, options?: ApiCallOptions) =>
