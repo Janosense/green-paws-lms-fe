@@ -10,6 +10,12 @@ export interface User {
   display_name: string
   roles: string[]
   capabilities?: string[]
+  // `account_kind` is returned by /vl/v1/auth/verify-email's user payload
+  // (see vl-lms AuthController::user_payload()) but NOT by /vl-auth/v1/me
+  // (see vl-jwt-auth RestController::user_payload()). Frontend treats it
+  // as optional: present immediately after verify-email; absent after a
+  // hard refresh that re-hydrates from /me alone.
+  account_kind?: string
 }
 
 /**
