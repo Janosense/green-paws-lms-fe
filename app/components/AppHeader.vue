@@ -77,6 +77,7 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- TODO: replace with inline autocomplete (planned post-Phase 3) -->
         <UButton
           to="/search"
           icon="i-lucide-search"

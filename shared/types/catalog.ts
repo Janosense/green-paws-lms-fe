@@ -212,3 +212,22 @@ export interface WebinarDetail {
 
 export type CourseDetailResponse = ApiEnvelope<CourseDetail>
 export type WebinarDetailResponse = ApiEnvelope<WebinarDetail>
+
+/* ------------------------------------------------------------------------ *
+ * Search-level types — Phase 3.5. The search response carries two parallel
+ * sections (courses + webinars), each shaped like a catalog list response.
+ * Pagination is shared across both sections via a single `?page=` param.
+ * ------------------------------------------------------------------------ */
+
+export interface SearchSection<TItem> {
+  items: TItem[]
+  pagination: CatalogPagination
+}
+
+export interface SearchData {
+  q: string
+  courses: SearchSection<CourseCardItem>
+  webinars: SearchSection<WebinarCardItem>
+}
+
+export type SearchResponse = ApiEnvelope<SearchData>

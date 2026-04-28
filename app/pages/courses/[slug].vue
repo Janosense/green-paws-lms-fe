@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { CourseDetailResponse } from '#shared/types/catalog'
+import { buildBreadcrumbSchema } from '~/utils/buildBreadcrumbSchema'
+import { buildCourseSchema } from '~/utils/buildCourseSchema'
 
 definePageMeta({
   layout: 'default'
@@ -56,6 +58,28 @@ useHead({
   titleTemplate: '%s',
   link: [{ rel: 'canonical', href: canonicalPath }]
 })
+
+const { siteUrl } = useSiteUrl()
+const structuredData = computed(() => {
+  const course = detail.value
+  if (!course) {
+    return []
+  }
+  return [
+    buildCourseSchema(course, siteUrl),
+    buildBreadcrumbSchema(
+      {
+        type: 'courses',
+        title: course.title,
+        canonicalPath: course.seo.canonical_path,
+        category: course.categories[0] ?? null
+      },
+      siteUrl
+    )
+  ]
+})
+
+useStructuredData(structuredData.value)
 
 function handleCtaClick() {
   if (!authStore.isAuthenticated) {

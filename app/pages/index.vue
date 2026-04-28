@@ -4,7 +4,10 @@ definePageMeta({
 })
 
 const { t } = useI18n()
-useHead({ title: () => t('home.tagline') })
+useSeoMeta({
+  title: () => t('home.tagline'),
+  description: () => t('home.meta_description')
+})
 
 const authStore = useAuthStore()
 </script>
@@ -16,6 +19,10 @@ const authStore = useAuthStore()
         size="h-20 sm:h-28"
         :link="false"
       />
+
+      <h1 class="sr-only">
+        Green Paws LMS
+      </h1>
 
       <p class="text-lg text-muted leading-relaxed">
         {{ t('home.tagline') }}

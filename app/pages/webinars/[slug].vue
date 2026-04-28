@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { WebinarDetailResponse } from '#shared/types/catalog'
+import { buildBreadcrumbSchema } from '~/utils/buildBreadcrumbSchema'
+import { buildEventSchema } from '~/utils/buildEventSchema'
 
 definePageMeta({
   layout: 'default'
@@ -56,6 +58,28 @@ useHead({
   titleTemplate: '%s',
   link: [{ rel: 'canonical', href: canonicalPath }]
 })
+
+const { siteUrl } = useSiteUrl()
+const structuredData = computed(() => {
+  const webinar = detail.value
+  if (!webinar) {
+    return []
+  }
+  return [
+    buildEventSchema(webinar, siteUrl),
+    buildBreadcrumbSchema(
+      {
+        type: 'webinars',
+        title: webinar.title,
+        canonicalPath: webinar.seo.canonical_path,
+        category: webinar.categories[0] ?? null
+      },
+      siteUrl
+    )
+  ]
+})
+
+useStructuredData(structuredData.value)
 
 function handleCtaClick() {
   if (!authStore.isAuthenticated) {

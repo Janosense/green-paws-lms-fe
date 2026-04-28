@@ -45,7 +45,10 @@ export default defineNuxtConfig({
     public: {
       // Read from NUXT_PUBLIC_* env vars automatically.
       wpApiBase: '',
-      wpAuthBase: ''
+      wpAuthBase: '',
+      // Phase 3.5: absolute site URL used by sitemap.xml, robots.txt, and
+      // JSON-LD structured data. Falls back to the local dev origin.
+      siteUrl: 'http://localhost:3000'
     }
   },
 
