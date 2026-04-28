@@ -1,15 +1,25 @@
 <script setup lang="ts">
-// CourseHero owns the hero strip for `/courses/[slug]`. The CTA's *state*
-// (label / disabled) is computed here from the detail payload + an
-// `is-authed` prop; the active path emits `cta-click` so the page can run
-// auth-aware navigation or fire the placeholder toast. Two heros (course
-// and webinar) instead of one with conditional soup — they diverge enough
-// that a single component would obscure the visual structure.
+// CourseHero owns the hero strip for `/courses/[slug]`. The CTA's full
+// state machine (label, color, disabled, click action) is computed here
+// from the detail payload + the auth and enrollments Pinia stores.
+//
+// Phase 4.2 promotes the placeholder Enroll button to a real flow:
+//   guest        → /login?return_to=<currentPath>
+//   enrolled     → /dashboard (Continue / Review)
+//   paid         → disabled, "оплата буде підключена пізніше"
+//   closed       → disabled
+//   not yet open → disabled, with formatted opens-at hint
+//   ready        → POST /vl/v1/enrollments → toast + /dashboard
+//
+// The button SSR-renders so the page is interactive immediately. The
+// reactive flip from "guest/ready" to "enrolled" happens after hydrate;
+// a brief flash is accepted (DECISIONS.md note for Phase 4.2).
 
 import type { CourseDetail } from '#shared/types/catalog'
 import { formatDuration } from '~/utils/formatDuration'
 import { formatPrice } from '~/utils/formatPrice'
 import { formatScheduledDate } from '~/utils/formatScheduledDate'
+import { resolveEnrollmentError } from '~/utils/resolveEnrollmentError'
 
 interface Props {
   course: CourseDetail
@@ -17,11 +27,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  'cta-click': []
-}>()
 
 const { t } = useI18n()
+const route = useRoute()
+const toast = useToast()
+const enrollmentsStore = useEnrollmentsStore()
 
 const initial = computed(() => props.course.title.trim().charAt(0).toUpperCase())
 
@@ -62,21 +72,149 @@ const secondaryLine = computed<string>(() => {
   return t('landing.course.self_paced_secondary')
 })
 
+type CtaAction = 'login' | 'dashboard' | 'enroll' | 'none'
+type CtaColor = 'primary' | 'neutral'
+
 interface CtaState {
   label: string
   disabled: boolean
+  color: CtaColor
+  action: CtaAction
 }
 
+const isLoading = ref(false)
+
 const cta = computed<CtaState>(() => {
-  if (!props.course.enrollment_open) {
-    return { label: t('landing.course.cta.closed'), disabled: true }
+  // Process top-to-bottom; first match wins. Order mirrors the spec table.
+
+  if (!props.isAuthed) {
+    return {
+      label: t('enrollment.cta.enroll'),
+      disabled: false,
+      color: 'primary',
+      action: 'login'
+    }
   }
-  return { label: t('landing.course.cta.enroll'), disabled: false }
+
+  if (enrollmentsStore.hasActiveEnrollment(props.course.id)) {
+    return {
+      label: t('enrollment.cta.continue'),
+      disabled: false,
+      color: 'primary',
+      action: 'dashboard'
+    }
+  }
+
+  const existing = enrollmentsStore.getEnrollment(props.course.id)
+  if (existing && existing.status === 'completed') {
+    return {
+      label: t('enrollment.cta.review'),
+      disabled: false,
+      color: 'neutral',
+      action: 'dashboard'
+    }
+  }
+
+  if (props.course.price > 0) {
+    return {
+      label: t('enrollment.cta.paid_unavailable'),
+      disabled: true,
+      color: 'primary',
+      action: 'none'
+    }
+  }
+
+  if (!props.course.enrollment_open) {
+    return {
+      label: t('enrollment.cta.closed'),
+      disabled: true,
+      color: 'primary',
+      action: 'none'
+    }
+  }
+
+  // Date checks run on the client only via `Date.now()` after hydrate. On
+  // SSR `now` is the server's UTC clock, which is acceptable here — the
+  // window comparison is coarse-grained (hours, not seconds).
+  const now = new Date()
+
+  if (props.course.enrollment_opens_at) {
+    const opensAt = new Date(props.course.enrollment_opens_at)
+    if (!Number.isNaN(opensAt.getTime()) && now < opensAt) {
+      const formatted = formatScheduledDate(
+        props.course.enrollment_opens_at,
+        'scheduled',
+        { completedPrefix: t('catalog.card.completed_prefix') }
+      )
+      return {
+        label: t('enrollment.cta.opens_at', { date: formatted }),
+        disabled: true,
+        color: 'primary',
+        action: 'none'
+      }
+    }
+  }
+
+  if (props.course.enrollment_closes_at) {
+    const closesAt = new Date(props.course.enrollment_closes_at)
+    if (!Number.isNaN(closesAt.getTime()) && now > closesAt) {
+      return {
+        label: t('enrollment.cta.closed'),
+        disabled: true,
+        color: 'primary',
+        action: 'none'
+      }
+    }
+  }
+
+  return {
+    label: t('enrollment.cta.enroll'),
+    disabled: false,
+    color: 'primary',
+    action: 'enroll'
+  }
 })
 
-function onCtaClick() {
-  if (!cta.value.disabled) {
-    emit('cta-click')
+async function onCtaClick() {
+  if (cta.value.disabled || isLoading.value) {
+    return
+  }
+
+  switch (cta.value.action) {
+    case 'login':
+      await navigateTo({ path: '/login', query: { return_to: route.fullPath } })
+      return
+    case 'dashboard':
+      await navigateTo('/dashboard')
+      return
+    case 'enroll':
+      await runEnroll()
+      return
+    case 'none':
+    default:
+      return
+  }
+}
+
+async function runEnroll() {
+  isLoading.value = true
+  try {
+    await enrollmentsStore.enroll(props.course.id)
+    toast.add({
+      title: t('enrollment.toast.enrolled'),
+      color: 'success',
+      icon: 'i-lucide-check'
+    })
+    await navigateTo('/dashboard')
+  } catch (error) {
+    toast.add({
+      title: t('common.error_title'),
+      description: t(resolveEnrollmentError(error)),
+      color: 'error',
+      icon: 'i-lucide-circle-alert'
+    })
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
@@ -145,9 +283,10 @@ function onCtaClick() {
           {{ priceLabel.value }}
         </p>
         <UButton
-          color="primary"
+          :color="cta.color"
           size="xl"
           :disabled="cta.disabled"
+          :loading="isLoading"
           icon="i-lucide-circle-plus"
           @click="onCtaClick"
         >
