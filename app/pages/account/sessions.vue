@@ -3,7 +3,7 @@ import type { Session } from '#shared/types/auth'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
-  layout: 'default',
+  layout: 'dashboard',
   middleware: 'auth'
 })
 
