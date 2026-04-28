@@ -8,9 +8,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const router = useRouter()
 const { t } = useI18n()
-const toast = useToast()
 const authStore = useAuthStore()
 
 const slug = computed(() => route.params.slug as string)
@@ -80,19 +78,6 @@ const structuredData = computed(() => {
 })
 
 useStructuredData(structuredData.value)
-
-function handleCtaClick() {
-  if (!authStore.isAuthenticated) {
-    void router.push({ path: '/login', query: { return_to: route.fullPath } })
-    return
-  }
-  toast.add({
-    title: t('landing.toast.enroll_soon.title'),
-    description: t('landing.toast.enroll_soon.description_course'),
-    icon: 'i-lucide-clock',
-    color: 'info'
-  })
-}
 </script>
 
 <template>
@@ -125,7 +110,6 @@ function handleCtaClick() {
       <CourseHero
         :course="detail"
         :is-authed="authStore.isAuthenticated"
-        @cta-click="handleCtaClick"
       />
 
       <div class="mx-auto max-w-3xl space-y-12">
