@@ -483,6 +483,19 @@
         "description": "Перевірте посилання або поверніться до курсу.",
         "back_to_dashboard": "На дашборд"
       }
+    },
+    "block": {
+      "image": {
+        "fallback_alt": "Зображення без опису"
+      },
+      "embed": {
+        "iframe_title": "Вбудоване відео ({provider})",
+        "fallback_label": "Перейти за посиланням:",
+        "provider_other": "інший провайдер"
+      },
+      "file": {
+        "download": "Завантажити"
+      }
     }
   },
   "errors": {

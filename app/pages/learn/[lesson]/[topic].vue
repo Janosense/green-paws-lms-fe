@@ -155,12 +155,10 @@ useSeoMeta({
         <pre class="text-xs bg-elevated rounded-md p-3 overflow-x-auto"><code>{{ JSON.stringify(topic.video, null, 2) }}</code></pre>
       </section>
 
-      <section>
-        <h2 class="text-lg mb-2">
-          {{ t('learn.topic.section.content_preview') }}
-        </h2>
-        <pre class="text-xs bg-elevated rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words"><code>{{ JSON.stringify(topic.content.blocks, null, 2) }}</code></pre>
-      </section>
+      <BlockRenderer
+        :blocks="topic.content.blocks"
+        class="mt-8"
+      />
 
       <p class="text-xs text-muted pt-8">
         <code>progress.status = {{ topic.progress.status }}</code>

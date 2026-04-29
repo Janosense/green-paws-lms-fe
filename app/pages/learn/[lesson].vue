@@ -160,12 +160,10 @@ useSeoMeta({
         <pre class="text-xs bg-elevated rounded-md p-3 overflow-x-auto"><code>{{ JSON.stringify(lesson.attachments, null, 2) }}</code></pre>
       </section>
 
-      <section>
-        <h2 class="text-lg mb-2">
-          {{ t('learn.lesson.section.content_preview') }}
-        </h2>
-        <pre class="text-xs bg-elevated rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words"><code>{{ JSON.stringify(lesson.content.blocks, null, 2) }}</code></pre>
-      </section>
+      <BlockRenderer
+        :blocks="lesson.content.blocks"
+        class="mt-8"
+      />
 
       <section v-if="lesson.topics.length">
         <h2 class="text-lg mb-2">
