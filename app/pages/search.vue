@@ -197,7 +197,7 @@ function changePage(nextPage: number) {
               v-for="item in courses.items"
               :key="item.id"
             >
-              <CourseCard :course="item" />
+              <CatalogCourseCard :course="item" />
             </li>
           </ul>
 
@@ -233,7 +233,7 @@ function changePage(nextPage: number) {
               v-for="item in webinars.items"
               :key="item.id"
             >
-              <WebinarCard :webinar="item" />
+              <CatalogWebinarCard :webinar="item" />
             </li>
           </ul>
 
