@@ -285,11 +285,11 @@ function changePage(nextPage: number) {
                 v-for="item in items"
                 :key="item.id"
               >
-                <CatalogCourseCard
+                <CourseCard
                   v-if="props.type === 'courses'"
                   :course="(item as CourseCardItem)"
                 />
-                <CatalogWebinarCard
+                <WebinarCard
                   v-else
                   :webinar="(item as WebinarCardItem)"
                 />

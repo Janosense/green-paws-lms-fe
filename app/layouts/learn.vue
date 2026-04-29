@@ -67,7 +67,7 @@ watch(() => route.fullPath, () => {
       <aside
         class="hidden md:block sticky top-14 w-[280px] shrink-0 self-start h-[calc(100vh-3.5rem)] bg-default border-e border-default"
       >
-        <LearnCurriculumRail />
+        <CurriculumRail />
       </aside>
 
       <main class="flex-1 min-w-0 bg-default">
@@ -84,7 +84,7 @@ watch(() => route.fullPath, () => {
       :ui="{ content: 'w-[80vw] max-w-[320px] bg-default' }"
     >
       <template #body>
-        <LearnCurriculumRail />
+        <CurriculumRail />
       </template>
     </USlideover>
   </div>

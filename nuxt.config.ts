@@ -31,6 +31,10 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  components: [
+    { path: '~/components', pathPrefix: false }
+  ],
+
   colorMode: {
     preference: 'light',
     fallback: 'light',
@@ -53,9 +57,12 @@ export default defineNuxtConfig({
   },
 
   // Phase 3.4: 5min SWR for landing pages — content is editorial and changes infrequently.
+  // Patterns are restricted to single-segment detail routes (`/courses/:slug`)
+  // so the `/courses` index payload doesn't collide with the
+  // `payload/courses/` directory the per-slug payloads need (ENOTDIR).
   routeRules: {
-    '/courses/**': { swr: 300 },
-    '/webinars/**': { swr: 300 }
+    '/courses/*': { swr: 300 },
+    '/webinars/*': { swr: 300 }
   },
 
   compatibilityDate: '2026-04-22',
