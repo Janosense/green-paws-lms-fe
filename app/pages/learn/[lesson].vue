@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { VideoPlayerAdapter } from '~/lib/video/types'
 import { formatDuration } from '~/utils/formatDuration'
 import { isLearnNotFound, resolveLearnError } from '~/utils/resolveLearnError'
 
@@ -9,6 +10,7 @@ definePageMeta({
 
 const route = useRoute()
 const { t } = useI18n()
+const toast = useToast()
 const progressStore = useProgressStore()
 
 const SLUG_PATTERN = /^[a-z0-9-]+$/
@@ -55,6 +57,17 @@ function formatSeconds(seconds: number): string {
   return formatDuration(seconds / 3600, durationUnits.value)
 }
 
+function formatTimestamp(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds))
+  const h = Math.floor(total / 3600)
+  const m = Math.floor((total % 3600) / 60)
+  const s = total % 60
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 const seoTitle = computed(() => {
   if (!lesson.value) {
     return t('learn.lesson.loading.title')
@@ -66,6 +79,79 @@ useSeoMeta({
   title: () => seoTitle.value,
   robots: 'noindex, nofollow'
 })
+
+// --- Phase 5.5: player + progress tracker wiring ---
+
+const videoAdapterRef = shallowRef<VideoPlayerAdapter | null>(null)
+const resumePromptShown = ref(false)
+
+// Lifecycle hooks must register during setup; instantiate the tracker once
+// using the resolved SSR data. Subsequent client-side refreshes that swap
+// the lesson are out of scope for 5.5 — route changes remount the page.
+const initialLesson = lesson.value
+const tracker = initialLesson
+  ? useProgressTracker({
+      entityType: 'lesson',
+      entityId: initialLesson.id,
+      durationSeconds: initialLesson.duration_seconds,
+      initialProgress: initialLesson.progress,
+      videoAdapter: videoAdapterRef
+    })
+  : null
+
+const isCompleted = computed(() => {
+  if (tracker) return tracker.completed.value
+  return lesson.value?.progress.status === 'completed'
+})
+
+function handleMarkComplete(): void {
+  tracker?.markComplete()
+}
+
+function onPlayerReady(adapter: VideoPlayerAdapter): void {
+  videoAdapterRef.value = adapter
+}
+
+function onPlayerError(err: Error): void {
+  if (import.meta.dev) {
+    console.warn('[learn] video player error', err)
+  }
+}
+
+function maybeShowResumeToast(): void {
+  if (resumePromptShown.value) return
+  if (!import.meta.client) return
+  const current = lesson.value
+  if (!current || !current.video) return
+  const progress = current.progress
+  if (!progress) return
+  if (progress.status === 'completed') return
+  const startAt = progress.position_seconds ?? 0
+  if (startAt <= 0) return
+
+  resumePromptShown.value = true
+  toast.add({
+    title: t('learn.player.resume.title'),
+    description: t('learn.player.resume.description', { time: formatTimestamp(startAt) }),
+    icon: 'i-lucide-history',
+    duration: 8_000,
+    actions: [
+      {
+        label: t('learn.player.resume.action'),
+        color: 'primary',
+        onClick: () => {
+          void videoAdapterRef.value?.seekTo(startAt)
+        }
+      }
+    ]
+  })
+}
+
+watch(lesson, () => {
+  if (import.meta.client) {
+    maybeShowResumeToast()
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -146,12 +232,23 @@ useSeoMeta({
         </p>
       </header>
 
-      <section v-if="lesson.video">
-        <p class="text-muted text-sm mb-2">
-          {{ t('learn.lesson.section.video') }} ({{ lesson.video.provider }})
-        </p>
-        <pre class="text-xs bg-elevated rounded-md p-3 overflow-x-auto"><code>{{ JSON.stringify(lesson.video, null, 2) }}</code></pre>
-      </section>
+      <ClientOnly v-if="lesson.video">
+        <VideoPlayer
+          :video="lesson.video"
+          @ready="onPlayerReady"
+          @error="onPlayerError"
+        />
+        <template #fallback>
+          <div class="not-prose mb-6">
+            <USkeleton class="aspect-video w-full rounded-lg" />
+          </div>
+        </template>
+      </ClientOnly>
+
+      <MarkCompleteButton
+        :completed="isCompleted"
+        @click="handleMarkComplete"
+      />
 
       <section v-if="lesson.attachments.length">
         <h2 class="text-lg mb-2">
@@ -189,10 +286,6 @@ useSeoMeta({
           </li>
         </ul>
       </section>
-
-      <p class="text-xs text-muted pt-8">
-        <code>progress.status = {{ lesson.progress.status }}</code>
-      </p>
     </article>
   </div>
 </template>
