@@ -40,7 +40,7 @@ Then open <http://localhost:3000>.
 |----------|---------|
 | `NUXT_PUBLIC_WP_API_BASE` | Public WordPress REST base, e.g. `https://green-paws-lms-backend.ddev.site/wp-json` — drives the `vl/v1/*` calls |
 | `NUXT_PUBLIC_WP_AUTH_BASE` | `vl-jwt-auth` namespace base, e.g. `…/wp-json/vl-auth/v1` |
-| `NUXT_WP_API_BASE_INTERNAL` | Optional server-only override for SSR (Docker setups) |
+| `NUXT_WP_API_BASE_INTERNAL` | Server-only override for SSR fetches. In DDEV dev, set to the plain-HTTP backend URL so Node's fetch bypasses the mkcert leaf cert (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`). Reserved for Docker network hostnames in prod. |
 | `NUXT_PUBLIC_SITE_URL` | Absolute frontend URL (no trailing slash). Used by `sitemap.xml`, `robots.txt`, and JSON-LD `@id`s. Falls back to `http://localhost:3000` |
 
 ## Scripts
@@ -75,7 +75,9 @@ Then open <http://localhost:3000>.
 - `/sitemap.xml` — homepage + catalog roots + every course/webinar slug. Pages courses and webinars in batches of 50, capped at 20 pages per type. 5-minute s-maxage.
 - `/robots.txt` — disallows the auth pages, `/account*`, `/dashboard*`, `/learn*`, `/search`, and any URL with `?return_to=`. Points to `/sitemap.xml`.
 
-`routeRules` in `nuxt.config.ts` apply 5-minute SWR to `/courses/**` and `/webinars/**`, since catalog content is editorial and changes infrequently.
+`routeRules` in `nuxt.config.ts` apply 5-minute SWR to `/courses/*` and `/webinars/*` (single-segment detail routes only), since catalog content is editorial and changes infrequently. The patterns deliberately exclude the bare `/courses` and `/webinars` index payloads — they collide with the per-slug payload directory in Nitro's filesystem cache (`ENOTDIR`).
+
+Components are auto-imported with `pathPrefix: false` (`nuxt.config.ts → components`), so files keep their bare filenames regardless of folder (`<CourseCard>` from `components/catalog/CourseCard.vue`, `<EnrolledCourseCard>` from `components/dashboard/EnrolledCourseCard.vue`, etc.). New component filenames must therefore stay globally unique across `app/components/`.
 
 ## API client
 
