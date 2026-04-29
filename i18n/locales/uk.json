@@ -428,6 +428,63 @@
       "minutes_short": "хв"
     }
   },
+  "learn": {
+    "layout": {
+      "back_to_course": "До курсу",
+      "back_to_course_loading": "Завантаження…",
+      "dashboard_link": "Мій кабінет"
+    },
+    "lesson": {
+      "section": {
+        "video": "Відео",
+        "attachments": "Матеріали",
+        "content_preview": "Контент (попередній перегляд блоків)",
+        "topics": "Теми"
+      },
+      "badge": {
+        "preview": "Прев'ю"
+      },
+      "loading": {
+        "title": "Завантаження уроку"
+      },
+      "error": {
+        "title": "Не вдалося завантажити урок",
+        "description_default": "Спробуйте оновити сторінку.",
+        "description_not_enrolled": "Ви не записані на курс. Поверніться до сторінки курсу, щоб записатися.",
+        "description_prerequisite_not_completed": "Завершіть попередній урок, щоб отримати доступ до цього.",
+        "description_unauthorized": "Вийшли з акаунту. Увійдіть знову.",
+        "back_to_dashboard": "На дашборд",
+        "back_to_course": "До курсу"
+      },
+      "not_found": {
+        "title": "Урок не знайдено",
+        "description": "Перевірте посилання або поверніться до курсу.",
+        "back_to_dashboard": "На дашборд"
+      }
+    },
+    "topic": {
+      "section": {
+        "video": "Відео",
+        "content_preview": "Контент (попередній перегляд блоків)"
+      },
+      "loading": {
+        "title": "Завантаження теми"
+      },
+      "error": {
+        "title": "Не вдалося завантажити тему",
+        "description_default": "Спробуйте оновити сторінку.",
+        "description_not_enrolled": "Ви не записані на курс. Поверніться до сторінки курсу, щоб записатися.",
+        "description_unauthorized": "Вийшли з акаунту. Увійдіть знову.",
+        "back_to_dashboard": "На дашборд",
+        "back_to_lesson": "До уроку"
+      },
+      "not_found": {
+        "title": "Тему не знайдено",
+        "description": "Перевірте посилання або поверніться до курсу.",
+        "back_to_dashboard": "На дашборд"
+      }
+    }
+  },
   "errors": {
     "network_error": "Не вдалося звʼязатися із сервером. Перевірте інтернет-зʼєднання.",
     "unknown_error": "Сталася непередбачена помилка. Спробуйте ще раз пізніше.",

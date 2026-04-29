@@ -149,7 +149,7 @@ function createApiFetch(): ApiClientFetch {
 
   return async <T>(request: NitroFetchRequest, options: ApiFetchOptions = {}): Promise<T> => {
     try {
-      return await baseFetch<T>(request, options as NitroFetchOptions<NitroFetchRequest>)
+      return (await baseFetch<T>(request, options as NitroFetchOptions<NitroFetchRequest>)) as T
     } catch (error) {
       const apiError = error as ApiError
       const canRetry
@@ -176,7 +176,7 @@ function createApiFetch(): ApiClientFetch {
       }
 
       const retryOptions = { ...options, __retried: true }
-      return await baseFetch<T>(request, retryOptions as NitroFetchOptions<NitroFetchRequest>)
+      return (await baseFetch<T>(request, retryOptions as NitroFetchOptions<NitroFetchRequest>)) as T
     }
   }
 }
