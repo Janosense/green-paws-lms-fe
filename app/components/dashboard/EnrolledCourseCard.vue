@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EnrollmentRecord } from '#shared/types/enrollments'
+import { continueUrl } from '~/composables/useLearnNavigation'
 
 interface Props {
   enrollment: EnrollmentRecord
@@ -7,6 +8,8 @@ interface Props {
 
 const { enrollment } = defineProps<Props>()
 const { t } = useI18n()
+const router = useRouter()
+const progressStore = useProgressStore()
 
 const coursePath = computed(() => `/courses/${enrollment.course.slug}`)
 
@@ -19,6 +22,25 @@ const ctaLabel = computed(() =>
     ? t('enrollment.actions.review')
     : t('enrollment.actions.continue')
 )
+
+const ctaLoading = ref(false)
+
+async function onContinueClick(): Promise<void> {
+  if (ctaLoading.value) return
+  ctaLoading.value = true
+  try {
+    await progressStore.ensureCourseLoaded(enrollment.course.slug)
+    const curriculum = progressStore.curricula[enrollment.course.slug]
+    if (!curriculum) {
+      await router.push(coursePath.value)
+      return
+    }
+    const url = continueUrl(curriculum)
+    await router.push(url ?? coursePath.value)
+  } finally {
+    ctaLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -62,9 +84,10 @@ const ctaLabel = computed(() =>
       </UProgress>
 
       <UButton
-        :to="coursePath"
         color="primary"
         block
+        :loading="ctaLoading"
+        @click="onContinueClick"
       >
         {{ ctaLabel }}
       </UButton>

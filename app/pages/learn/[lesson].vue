@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import type { VideoPlayerAdapter } from '~/lib/video/types'
+import {
+  flattenCurriculum,
+  neighborsByLessonSlug
+} from '~/composables/useLearnNavigation'
 import { formatDuration } from '~/utils/formatDuration'
 import { isLearnNotFound, resolveLearnError } from '~/utils/resolveLearnError'
 
@@ -152,6 +156,17 @@ watch(lesson, () => {
     maybeShowResumeToast()
   }
 }, { immediate: true })
+
+const curriculum = computed(() => progressStore.currentCourse)
+
+const navigationLeaves = computed(() => {
+  const c = curriculum.value
+  return c ? flattenCurriculum(c) : []
+})
+
+const neighbors = computed(() =>
+  neighborsByLessonSlug(navigationLeaves.value, lessonSlug.value)
+)
 </script>
 
 <template>
@@ -260,6 +275,13 @@ watch(lesson, () => {
       <BlockRenderer
         :blocks="lesson.content.blocks"
         class="mt-8"
+      />
+
+      <LearnPagination
+        v-if="curriculum && (neighbors.prev || neighbors.next)"
+        :prev="neighbors.prev"
+        :next="neighbors.next"
+        :next-highlighted="isCompleted ?? false"
       />
 
       <section v-if="lesson.topics.length">

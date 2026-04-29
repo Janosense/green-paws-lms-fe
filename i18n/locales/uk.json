@@ -432,13 +432,25 @@
     "layout": {
       "back_to_course": "До курсу",
       "back_to_course_loading": "Завантаження…",
-      "dashboard_link": "Мій кабінет"
+      "dashboard_link": "Мій кабінет",
+      "open_curriculum": "Відкрити план курсу",
+      "close_curriculum": "Закрити план курсу"
+    },
+    "rail": {
+      "course_label": "Курс",
+      "progress_label": "{pct}% завершено",
+      "module_label": "Модуль",
+      "no_topics_hint": "Немає тем"
+    },
+    "pagination": {
+      "label": "Навігація уроку",
+      "prev": "Попередній",
+      "next": "Наступний"
     },
     "lesson": {
       "section": {
         "video": "Відео",
         "attachments": "Матеріали",
-        "content_preview": "Контент (попередній перегляд блоків)",
         "topics": "Теми"
       },
       "badge": {
@@ -464,8 +476,7 @@
     },
     "topic": {
       "section": {
-        "video": "Відео",
-        "content_preview": "Контент (попередній перегляд блоків)"
+        "video": "Відео"
       },
       "loading": {
         "title": "Завантаження теми"

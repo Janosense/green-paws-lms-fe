@@ -102,3 +102,9 @@ events bubble via the standard media events.
   `RestAuthenticator` reads the JWT from the JSON body's `__bearer` field.
 - "Re-mark as incomplete" intentionally not supported.
 - Frontend testing infra (Vitest) still pending.
+
+> 2026-04-29 (Phase 5.6): `__bearer` body fallback shipped in
+> `\VLJwtAuth\Auth\AuthFacade::user_from_request()` — unload beacons now
+> resolve to 201. Verified against DDEV: closing the tab on a
+> partially-watched lesson produces a 201 in the Network tab "Beacon"
+> filter. Previously 401.
