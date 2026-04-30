@@ -555,5 +555,67 @@
     "vl_lms_password_reset_invalid_token": "Посилання для скидання пароля недійсне або вже використане.",
     "vl_lms_password_reset_token_expired": "Термін дії посилання вичерпано. Замовте нове скидання пароля.",
     "vl_lms_password_reset_weak_password": "Пароль занадто слабкий. Мінімум 8 символів."
+  },
+  "quiz": {
+    "player": {
+      "seoTitle": "Quiz: {slug}",
+      "questionCount": "Запитання {current} з {total}",
+      "questionNumber": "Запитання {n}",
+      "questionsNav": "Навігація по запитаннях",
+      "dotLabel": "Запитання {n}",
+      "dotAnswered": "відповідь дано",
+      "answeredCount": "Відповіді: {answered} / {total}",
+      "pointsShort": "балів",
+      "timeRemaining": "Залишилось часу",
+      "timeUnlimited": "Без обмеження часу",
+      "saving": "Збереження…",
+      "previous": "Попереднє",
+      "next": "Наступне",
+      "finish": "Завершити quiz",
+      "confirmFinishTitle": "Завершити quiz?",
+      "confirmFinishBody": "Ви відповіли на {answered} з {total} запитань. Завершити quiz?",
+      "confirmFinishConfirm": "Завершити",
+      "confirmFinishCancel": "Продовжити"
+    },
+    "results": {
+      "passed": "Quiz пройдено",
+      "failed": "Quiz не пройдено",
+      "expired": "Час вийшов",
+      "scoreFormat": "{score} з {max}",
+      "passingThreshold": "Прохідний бал: {threshold}%",
+      "timeTaken": "Витрачено часу: {time}",
+      "review": "Детальний розбір",
+      "yourAnswer": "Ваша відповідь",
+      "correctAnswer": "Правильна відповідь:",
+      "correctHidden": "Правильна відповідь прихована",
+      "explanation": "Пояснення",
+      "tryAgain": "Спробувати ще",
+      "backToCourse": "Повернутися до курсу"
+    },
+    "input": {
+      "trueFalse": {
+        "true": "Так",
+        "false": "Ні"
+      },
+      "text": {
+        "placeholder": "Ваша відповідь…"
+      }
+    },
+    "errors": {
+      "title": "Помилка quiz",
+      "backToDashboard": "Назад до панелі",
+      "unauthenticated": "Сесія недійсна. Увійдіть знову.",
+      "forbidden": "Доступ заборонено.",
+      "notFound": "Quiz не знайдено.",
+      "misconfigured": "Quiz не прив'язаний до жодного курсу. Зверніться до інструктора.",
+      "notEnrolled": "Ви не зареєстровані на курс.",
+      "attemptsExhausted": "Кількість спроб вичерпано.",
+      "attemptNotFound": "Спробу не знайдено.",
+      "expired": "Час quiz вийшов. Результат збережено.",
+      "alreadyFinalized": "Quiz вже завершено.",
+      "invalidQuestion": "Невідоме запитання. Оновіть сторінку.",
+      "invalidAnswer": "Відповідь у неправильному форматі.",
+      "internal": "Сталася помилка. Спробуйте ще раз."
+    }
   }
 }
