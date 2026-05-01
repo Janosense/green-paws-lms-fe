@@ -53,7 +53,7 @@ function emitUpdate(): void {
   emit('update', { answer_ids: ids })
 }
 
-function onToggle(answerId: string, value: boolean | undefined): void {
+function onToggle(answerId: string, value: boolean | 'indeterminate' | undefined): void {
   if (props.isReadonly) return
   const next = new Set(selected.value)
   if (value === true) {

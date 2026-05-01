@@ -227,22 +227,19 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
   }
 
   function clear(slug: string): void {
-    if (slug in attempts.value) {
-      const next = { ...attempts.value }
-      delete next[slug]
-      attempts.value = next
-    }
-    if (slug in status.value) {
-      const next = { ...status.value }
-      delete next[slug]
-      status.value = next
-    }
-    if (slug in errors.value) {
-      const next = { ...errors.value }
-      delete next[slug]
-      errors.value = next
-    }
+    attempts.value = filteredOut(attempts.value, slug)
+    status.value = filteredOut(status.value, slug)
+    errors.value = filteredOut(errors.value, slug)
     inFlightStarts.delete(slug)
+  }
+
+  function filteredOut<T>(record: Record<string, T>, key: string): Record<string, T> {
+    if (!(key in record)) return record
+    const next: Record<string, T> = {}
+    for (const k in record) {
+      if (k !== key) next[k] = record[k] as T
+    }
+    return next
   }
 
   function clearAll(): void {

@@ -64,11 +64,11 @@ export interface QuizQuestionText extends QuizQuestionBase {
   match_mode?: TextMatchMode
 }
 
-export type QuizQuestion =
-  | QuizQuestionSingleChoice
-  | QuizQuestionMultipleChoice
-  | QuizQuestionTrueFalse
-  | QuizQuestionText
+export type QuizQuestion
+  = | QuizQuestionSingleChoice
+    | QuizQuestionMultipleChoice
+    | QuizQuestionTrueFalse
+    | QuizQuestionText
 
 // ----------------------------------------------------------------------
 // Answer payloads
@@ -79,11 +79,11 @@ export interface MultipleChoiceAnswerData { answer_ids: string[] }
 export interface TrueFalseAnswerData { value: boolean }
 export interface TextAnswerData { text: string }
 
-export type AnswerData =
-  | SingleChoiceAnswerData
-  | MultipleChoiceAnswerData
-  | TrueFalseAnswerData
-  | TextAnswerData
+export type AnswerData
+  = | SingleChoiceAnswerData
+    | MultipleChoiceAnswerData
+    | TrueFalseAnswerData
+    | TextAnswerData
 
 export interface QuizSavedAnswer {
   question_id: number

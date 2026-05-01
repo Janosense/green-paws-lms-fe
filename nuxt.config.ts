@@ -13,6 +13,10 @@ export default defineNuxtConfig({
 
   ssr: true,
 
+  components: [
+    { path: '~/components', pathPrefix: false }
+  ],
+
   devtools: { enabled: true },
 
   app: {
@@ -30,10 +34,6 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
-
-  components: [
-    { path: '~/components', pathPrefix: false }
-  ],
 
   colorMode: {
     preference: 'light',
