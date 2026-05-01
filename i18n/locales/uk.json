@@ -109,6 +109,7 @@
     "title": "Моє навчання",
     "sidebar": {
       "my_learning": "Моє навчання",
+      "certificates": "Сертифікати",
       "account": "Профіль",
       "sessions": "Сесії",
       "toggle": "Меню"
@@ -615,6 +616,53 @@
       "alreadyFinalized": "Quiz вже завершено.",
       "invalidQuestion": "Невідоме запитання. Оновіть сторінку.",
       "invalidAnswer": "Відповідь у неправильному форматі.",
+      "internal": "Сталася помилка. Спробуйте ще раз."
+    }
+  },
+  "certificate": {
+    "list": {
+      "title": "Мої сертифікати",
+      "viewButton": "Переглянути",
+      "statusActive": "Активний",
+      "statusRevoked": "Відкликано",
+      "empty": {
+        "title": "Поки що немає сертифікатів",
+        "body": "Завершіть курс, щоб отримати сертифікат.",
+        "cta": "До каталогу курсів"
+      }
+    },
+    "detail": {
+      "back": "Сертифікати",
+      "download": "Завантажити PDF",
+      "downloadUnavailable": "Завантаження недоступне",
+      "verifyLink": "Сторінка верифікації",
+      "verifyLinkHint": "Будь-хто з посиланням може перевірити справжність.",
+      "fields": {
+        "course": "Курс",
+        "learner": "Учасник",
+        "issuedBy": "Видано",
+        "issuedAt": "Дата видачі",
+        "instructorSingular": "Інструктор",
+        "instructorPlural": "Інструктори",
+        "score": "Підсумкова оцінка",
+        "uuid": "Ідентифікатор"
+      }
+    },
+    "revoked": {
+      "title": "Сертифікат відкликано",
+      "body": "Відкликано: {date}"
+    },
+    "public": {
+      "title": "Перевірка сертифіката",
+      "activeHeadline": "Сертифікат справжній",
+      "revokedHeadline": "Сертифікат відкликано",
+      "issuedAt": "Видано {issuer} {date}"
+    },
+    "errors": {
+      "unauthenticated": "Сесія недійсна. Увійдіть знову.",
+      "forbidden": "Доступ заборонено.",
+      "notFound": "Сертифікат не знайдено.",
+      "revoked": "Сертифікат відкликано.",
       "internal": "Сталася помилка. Спробуйте ще раз."
     }
   }

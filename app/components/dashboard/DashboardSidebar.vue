@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-type SidebarItemKey = 'my_learning' | 'account' | 'sessions'
+type SidebarItemKey = 'my_learning' | 'certificates' | 'account' | 'sessions'
 
 interface SidebarItem {
   key: SidebarItemKey
-  to: '/dashboard' | '/account' | '/account/sessions'
+  to: '/dashboard' | '/dashboard/certificates' | '/account' | '/account/sessions'
   labelKey: string
   icon: string
 }
 
 const items: SidebarItem[] = [
   { key: 'my_learning', to: '/dashboard', labelKey: 'dashboard.sidebar.my_learning', icon: 'i-lucide-book-open' },
+  { key: 'certificates', to: '/dashboard/certificates', labelKey: 'dashboard.sidebar.certificates', icon: 'i-lucide-award' },
   { key: 'account', to: '/account', labelKey: 'dashboard.sidebar.account', icon: 'i-lucide-user' },
   { key: 'sessions', to: '/account/sessions', labelKey: 'dashboard.sidebar.sessions', icon: 'i-lucide-monitor' }
 ]
