@@ -109,6 +109,7 @@
     "title": "Моє навчання",
     "sidebar": {
       "my_learning": "Моє навчання",
+      "webinars": "Мої вебінари",
       "certificates": "Сертифікати",
       "account": "Профіль",
       "sessions": "Сесії",
@@ -664,6 +665,89 @@
       "notFound": "Сертифікат не знайдено.",
       "revoked": "Сертифікат відкликано.",
       "internal": "Сталася помилка. Спробуйте ще раз."
+    }
+  },
+  "webinar": {
+    "page_title": "Мої вебінари",
+    "page_breadcrumb": "Мої вебінари",
+    "back_to_list": "Назад до вебінарів",
+    "detail_link": "Деталі",
+    "go_to_dashboard": "Перейти в кабінет",
+    "registered_at": "Зареєстровано {date}",
+    "scheduled_at": "{date}",
+    "duration_label": "Тривалість",
+    "no_recording_offered": "Запис не надається",
+    "recording_until": "Доступ до запису до {date}",
+    "recording_expired_on": "Доступ до запису завершено {date}",
+    "session_cancelled_alert": "Вебінар скасовано організатором",
+    "cancelled_at_line": "Реєстрацію скасовано {date}",
+    "join_button": "Приєднатися",
+    "watch_recording_button": "Дивитися запис",
+    "register_button": "Зареєструватися",
+    "re_register_button": "Зареєструватися знову",
+    "cancel_button": "Скасувати реєстрацію",
+    "cancel_confirm_title": "Скасувати реєстрацію?",
+    "cancel_confirm_body": "Ви впевнені, що хочете скасувати реєстрацію на цей вебінар?",
+    "cancel_confirm_yes": "Так, скасувати",
+    "cancel_confirm_no": "Ні, залишити",
+    "cancel_success": "Реєстрацію скасовано",
+    "register_success": "Ви зареєстровані",
+    "re_register_success": "Реєстрацію відновлено",
+    "show_cancelled_toggle": "Показати скасовані",
+    "status": {
+      "scheduled": "Заплановано",
+      "live": "В ефірі",
+      "completed": "Завершено",
+      "cancelled": "Скасовано"
+    },
+    "cta": {
+      "guest": "Зареєструватися",
+      "paid_blocked": "Купити квиток",
+      "paid_blocked_tooltip": "Платні вебінари будуть доступні незабаром",
+      "registration_not_open_yet": "Реєстрація відкриється {date}",
+      "registration_closed": "Реєстрацію завершено",
+      "capacity_reached": "Всі місця заброньовано",
+      "register_ready": "Зареєструватися",
+      "registered_pending": "Ви зареєстровані",
+      "registered_join_window": "Приєднатися",
+      "registered_past_recording_available": "Дивитися запис",
+      "registered_past_no_recording": "Вебінар завершено",
+      "registered_past_window_expired": "Доступ до запису завершено",
+      "cancelled_registration_can_re_register": "Зареєструватися знову",
+      "session_cancelled": "Вебінар скасовано"
+    },
+    "errors": {
+      "webinar_not_found": "Вебінар не знайдено",
+      "registration_not_open_yet": "Реєстрація ще не відкрилася",
+      "registration_closed": "Реєстрацію завершено",
+      "payment_required": "Цей вебінар платний. Оплата доступна незабаром.",
+      "capacity_reached": "Всі місця заброньовано",
+      "not_registered": "Ви не зареєстровані на цей вебінар",
+      "access_not_registered": "Спочатку зареєструйтесь",
+      "join_window_not_open": "Кімната відкриється {date}",
+      "join_window_closed": "Час приєднання вийшов",
+      "meeting_not_provisioned": "Кімната ще не налаштована. Спробуйте за хвилину.",
+      "recording_not_available": "Запис недоступний",
+      "recording_window_expired": "Доступ до запису завершено",
+      "network_error": "Помилка мережі",
+      "unknown": "Сталася невідома помилка"
+    },
+    "empty": {
+      "title": "Поки що жодного зареєстрованого вебінару",
+      "description": "Перегляньте каталог вебінарів і зареєструйтесь на потрібний.",
+      "cta": "До каталогу"
+    },
+    "section": {
+      "upcoming": "Майбутні",
+      "past": "Минулі",
+      "cancelled": "Скасовано",
+      "empty_upcoming": "Немає майбутніх вебінарів",
+      "empty_past": "Немає минулих вебінарів"
+    },
+    "countdown": {
+      "long": "{days} д {hours} год {minutes} хв",
+      "short": "{d}д {h}г {m}хв",
+      "expired": "Час вийшов"
     }
   }
 }

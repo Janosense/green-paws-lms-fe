@@ -1,13 +1,16 @@
 <script setup lang="ts">
-// WebinarHero mirrors CourseHero with date/status semantics. The "Через
-// N днів" line is computed once on render — by design, no live countdown
-// (Phase 3.4 explicitly rejects it). SWR cache absorbs the small drift
-// between SSR and hydration.
+// Phase 7.5 — the placeholder CTA from Phase 3.4 is now backed by the real
+// state machine in `useWebinarStateMachine`. The component owns the
+// register/re-register flow end-to-end so the public landing page is a
+// thin wrapper around `<WebinarHero>` and the marketing sections.
 
+import { useNow } from '@vueuse/core'
 import type { WebinarDetail, WebinarStatus } from '#shared/types/catalog'
+import { useWebinarStateMachine, type WebinarCtaState } from '~/composables/useWebinarStateMachine'
 import { formatPrice } from '~/utils/formatPrice'
 import { formatRelativeDate } from '~/utils/formatRelativeDate'
 import { formatScheduledDate } from '~/utils/formatScheduledDate'
+import { resolveWebinarError } from '~/utils/resolveWebinarError'
 
 interface Props {
   webinar: WebinarDetail
@@ -15,11 +18,12 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  'cta-click': []
-}>()
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
+const store = useWebinarRegistrationsStore()
 
 const STATUS_COLORS: Record<WebinarStatus, 'primary' | 'error' | 'neutral'> = {
   scheduled: 'primary',
@@ -56,30 +60,139 @@ const priceLabel = computed(() => {
   return { value: formatPrice(props.webinar.price, props.webinar.currency), free: false }
 })
 
-interface CtaState {
-  label: string
-  disabled: boolean
-}
+const now = useNow({ interval: 1000 })
+const capacityReached = ref(false)
 
-const cta = computed<CtaState>(() => {
-  if (props.webinar.status === 'completed') {
-    return { label: t('landing.webinar.cta.completed'), disabled: true }
+const state = computed<WebinarCtaState>(() => useWebinarStateMachine({
+  webinar: props.webinar,
+  registration: store.getRegistration(props.webinar.slug),
+  isAuthenticated: props.isAuthed,
+  now: now.value,
+  capacityReached: capacityReached.value
+}))
+
+const opensAtFormatted = computed(() => {
+  if (state.value.kind !== 'registration_not_open_yet') return ''
+  const date = new Date(state.value.opensAt)
+  if (Number.isNaN(date.getTime())) return ''
+  try {
+    return new Intl.DateTimeFormat('uk-UA', {
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).format(date)
+  } catch {
+    return state.value.opensAt
   }
-  if (props.webinar.status === 'cancelled') {
-    return { label: t('landing.webinar.cta.cancelled'), disabled: true }
-  }
-  if (props.webinar.status === 'live') {
-    return { label: t('landing.webinar.cta.live'), disabled: true }
-  }
-  if (!props.webinar.registration_open) {
-    return { label: t('landing.webinar.cta.closed'), disabled: true }
-  }
-  return { label: t('landing.webinar.cta.register'), disabled: false }
 })
 
-function onCtaClick() {
-  if (!cta.value.disabled) {
-    emit('cta-click')
+interface CtaUi {
+  labelKey: string
+  labelArgs?: Record<string, unknown>
+  icon: string
+  disabled: boolean
+  loading: boolean
+  /** Optional inline tooltip-style helper text rendered below the button. */
+  helperKey?: string
+  variant?: 'register' | 're_register' | 'join' | 'recording' | 'detail' | 'login' | 'paid' | 'disabled'
+}
+
+const registerLoading = ref(false)
+
+const ctaUi = computed<CtaUi>(() => {
+  switch (state.value.kind) {
+    case 'guest':
+      return { labelKey: 'webinar.cta.guest', icon: 'i-lucide-log-in', disabled: false, loading: false, variant: 'login' }
+    case 'paid_blocked':
+      return {
+        labelKey: 'webinar.cta.paid_blocked',
+        icon: 'i-lucide-lock',
+        disabled: true,
+        loading: false,
+        helperKey: 'webinar.cta.paid_blocked_tooltip',
+        variant: 'paid'
+      }
+    case 'registration_not_open_yet':
+      return {
+        labelKey: 'webinar.cta.registration_not_open_yet',
+        labelArgs: { date: opensAtFormatted.value },
+        icon: 'i-lucide-clock',
+        disabled: true,
+        loading: false,
+        variant: 'disabled'
+      }
+    case 'registration_closed':
+      return { labelKey: 'webinar.cta.registration_closed', icon: 'i-lucide-x', disabled: true, loading: false, variant: 'disabled' }
+    case 'capacity_reached':
+      return { labelKey: 'webinar.cta.capacity_reached', icon: 'i-lucide-users', disabled: true, loading: false, variant: 'disabled' }
+    case 'register_ready':
+      return { labelKey: 'webinar.cta.register_ready', icon: 'i-lucide-calendar-plus', disabled: false, loading: registerLoading.value, variant: 'register' }
+    case 'registered_pending':
+      return { labelKey: 'webinar.cta.registered_pending', icon: 'i-lucide-check', disabled: false, loading: false, variant: 'detail' }
+    case 'registered_join_window':
+      return { labelKey: 'webinar.cta.registered_join_window', icon: 'i-lucide-video', disabled: false, loading: false, variant: 'join' }
+    case 'registered_past_recording_available':
+      return { labelKey: 'webinar.cta.registered_past_recording_available', icon: 'i-lucide-play-circle', disabled: false, loading: false, variant: 'recording' }
+    case 'registered_past_no_recording':
+      return { labelKey: 'webinar.cta.registered_past_no_recording', icon: 'i-lucide-flag', disabled: true, loading: false, variant: 'disabled' }
+    case 'registered_past_window_expired':
+      return { labelKey: 'webinar.cta.registered_past_window_expired', icon: 'i-lucide-clock', disabled: true, loading: false, variant: 'disabled' }
+    case 'cancelled_registration_can_re_register':
+      return { labelKey: 'webinar.cta.cancelled_registration_can_re_register', icon: 'i-lucide-calendar-plus', disabled: false, loading: registerLoading.value, variant: 're_register' }
+    case 'session_cancelled':
+      return { labelKey: 'webinar.cta.session_cancelled', icon: 'i-lucide-x-circle', disabled: true, loading: false, variant: 'disabled' }
+  }
+  return { labelKey: 'webinar.cta.registration_closed', icon: 'i-lucide-x', disabled: true, loading: false, variant: 'disabled' }
+})
+
+const ctaLabel = computed(() => t(ctaUi.value.labelKey, ctaUi.value.labelArgs ?? {}))
+
+async function performRegister(successKey: string): Promise<void> {
+  if (registerLoading.value) return
+  registerLoading.value = true
+  try {
+    await store.register(props.webinar.slug)
+    capacityReached.value = false
+    toast.add({
+      title: t(successKey),
+      color: 'success',
+      icon: 'i-lucide-check'
+    })
+    void router.push('/dashboard/webinars')
+  } catch (caught) {
+    const resolved = resolveWebinarError(caught)
+    if (resolved.key === 'webinar.errors.capacity_reached') {
+      capacityReached.value = true
+    }
+    toast.add({
+      title: t(resolved.key),
+      color: 'error',
+      icon: 'i-lucide-alert-triangle'
+    })
+  } finally {
+    registerLoading.value = false
+  }
+}
+
+async function onCtaClick(): Promise<void> {
+  switch (state.value.kind) {
+    case 'guest':
+      await router.push({ path: '/login', query: { return_to: route.fullPath } })
+      return
+    case 'register_ready':
+      await performRegister('webinar.register_success')
+      return
+    case 'cancelled_registration_can_re_register':
+      await performRegister('webinar.re_register_success')
+      return
+    case 'registered_pending':
+      await router.push(`/dashboard/webinars/${props.webinar.slug}`)
+      return
+    default:
+      // disabled / handled by sub-button slots
+      return
   }
 }
 </script>
@@ -150,15 +263,48 @@ function onCtaClick() {
         >
           {{ priceLabel.value }}
         </p>
+
+        <!-- Join / Recording use the dedicated redirect-aware buttons.
+             Everything else funnels through the unified `onCtaClick`. -->
+        <WebinarJoinButton
+          v-if="state.kind === 'registered_join_window'"
+          :slug="webinar.slug"
+          size="xl"
+        />
+        <WebinarRecordingButton
+          v-else-if="state.kind === 'registered_past_recording_available'"
+          :slug="webinar.slug"
+          size="xl"
+        />
         <UButton
+          v-else
           color="primary"
           size="xl"
-          :disabled="cta.disabled"
-          icon="i-lucide-calendar-plus"
+          :icon="ctaUi.icon"
+          :disabled="ctaUi.disabled"
+          :loading="ctaUi.loading"
           @click="onCtaClick"
         >
-          {{ cta.label }}
+          {{ ctaLabel }}
         </UButton>
+
+        <UButton
+          v-if="state.kind === 'registered_pending' || state.kind === 'registered_join_window' || state.kind === 'registered_past_recording_available'"
+          :to="`/dashboard/webinars/${webinar.slug}`"
+          color="neutral"
+          variant="ghost"
+          size="md"
+          icon="i-lucide-arrow-right"
+        >
+          {{ t('webinar.go_to_dashboard') }}
+        </UButton>
+
+        <p
+          v-if="ctaUi.helperKey"
+          class="text-xs text-muted"
+        >
+          {{ t(ctaUi.helperKey) }}
+        </p>
       </div>
     </div>
 
