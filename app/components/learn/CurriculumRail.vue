@@ -15,6 +15,18 @@ const currentTopicSlug = computed<string | null>(() => {
   return value ? String(value) : null
 })
 
+// `/learn/sessions/[slug]` exposes the slug as `route.params.slug`. Match
+// only on that route name so a future page also using `slug` won't bleed
+// into session-leaf highlighting.
+const currentSessionSlug = computed<string | null>(() => {
+  if (route.name !== 'learn-sessions-slug') {
+    return null
+  }
+  const raw = route.params.slug
+  const value = Array.isArray(raw) ? raw[0] : raw
+  return value ? String(value) : null
+})
+
 const curriculum = computed(() => progressStore.currentCourse)
 </script>
 
@@ -83,6 +95,17 @@ const curriculum = computed(() => progressStore.currentCourse)
               courseSlug: curriculum.course.slug
             }"
             :is-current="currentLessonSlug === lesson.slug && !currentTopicSlug"
+          />
+        </div>
+        <div
+          v-if="curriculum.sessions.length"
+          class="pt-2 space-y-0.5"
+        >
+          <CurriculumRailSessionLeaf
+            v-for="session in curriculum.sessions"
+            :key="session.id"
+            :session="session"
+            :is-current="currentSessionSlug === session.slug"
           />
         </div>
       </template>

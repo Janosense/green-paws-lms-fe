@@ -13,7 +13,14 @@ const { prev, next, nextHighlighted } = defineProps<Props>()
 const { t } = useI18n()
 
 function leafTitle(leaf: LearnLeaf): string {
-  return leaf.kind === 'topic' ? leaf.topic.title : leaf.lesson.title
+  switch (leaf.kind) {
+    case 'topic':
+      return leaf.topic.title
+    case 'lesson':
+      return leaf.lesson.title
+    case 'session':
+      return leaf.session.title
+  }
 }
 </script>
 

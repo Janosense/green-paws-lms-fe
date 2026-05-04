@@ -62,7 +62,7 @@ const dateLine = computed(() => formatScheduledDate(
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <WebinarStatusBadge
+          <EventStatusBadge
             :status="registration.webinar.status"
             size="sm"
           />
@@ -79,7 +79,7 @@ const dateLine = computed(() => formatScheduledDate(
             v-if="showCountdown"
             class="text-xs text-muted"
           >
-            <WebinarCountdown
+            <EventCountdown
               :target="registration.webinar.scheduled_start as string"
               format="short"
             />
@@ -87,14 +87,14 @@ const dateLine = computed(() => formatScheduledDate(
         </div>
 
         <div class="flex flex-wrap items-center gap-2 pt-1">
-          <WebinarJoinButton
+          <EventJoinButton
             v-if="isJoinWindowOpen"
-            :slug="slug"
+            :redirect-path="`/vl/v1/webinars/${slug}/join`"
             size="sm"
           />
-          <WebinarRecordingButton
+          <EventRecordingButton
             v-else-if="recordingAvailable"
-            :slug="slug"
+            :redirect-path="`/vl/v1/webinars/${slug}/recording`"
             size="sm"
           />
           <UButton

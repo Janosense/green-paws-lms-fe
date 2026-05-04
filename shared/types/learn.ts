@@ -11,7 +11,8 @@
 import type { ApiEnvelope } from './api'
 
 export type ProgressStatus = 'not_started' | 'in_progress' | 'completed'
-export type EntityType = 'lesson' | 'topic' | 'module'
+export type EntityType = 'lesson' | 'topic' | 'module' | 'session'
+export type SessionLifecycleStatus = 'scheduled' | 'live' | 'completed' | 'cancelled'
 export type VideoProvider = 'vimeo' | 'youtube' | 'file' | 'embed'
 
 export interface ProgressShape {
@@ -195,18 +196,67 @@ export interface CurriculumModuleNode {
   lessons: CurriculumLessonNode[]
 }
 
-export interface NextEntityHint {
-  type: 'lesson' | 'topic'
+/**
+ * Phase 7.4: cohort courses surface their top-level `vl_session` posts as
+ * curriculum-tree leaves alongside modules / orphan lessons. Self-paced
+ * courses always emit an empty `sessions` list.
+ */
+export interface CurriculumSessionNode {
+  type: 'session'
   id: number
   slug: string
-  lesson_slug: string
+  title: string
+  session_number: number
+  scheduled_start: string | null
+  scheduled_end: string | null
+  status: SessionLifecycleStatus
+  is_completed: boolean
+  join_url_path: string
+  recording_url_path: string | null
 }
+
+export type NextEntityHint
+  = | { type: 'lesson', id: number, slug: string, lesson_slug: string }
+    | { type: 'topic', id: number, slug: string, lesson_slug: string }
+    | { type: 'session', id: number, slug: string, title: string, scheduled_start: string | null }
 
 export interface CurriculumResponse {
   course: CurriculumCourse
   modules: CurriculumModuleNode[]
   orphan_lessons: CurriculumLessonNode[]
+  sessions: CurriculumSessionNode[]
   next_entity: NextEntityHint | null
+}
+
+// --- session detail (Phase 7.4 — `GET /vl/v1/learn/sessions/{slug}`) ---
+
+export interface SessionDetailSessionBlock {
+  id: number
+  slug: string
+  title: string
+  course_id: number
+  course_slug: string
+  session_number: number
+  scheduled_start: string | null
+  scheduled_end: string | null
+  status: SessionLifecycleStatus
+  materials: AttachmentShape[]
+  recording_available_until: string | null
+}
+
+export interface SessionDetailComputedBlock {
+  join_window_open: boolean
+  join_opens_at: string | null
+  join_closes_at: string | null
+  recording_available: boolean
+  is_past: boolean
+  user_attended: boolean
+}
+
+export interface SessionDetailResponse {
+  success: true
+  session: SessionDetailSessionBlock
+  computed: SessionDetailComputedBlock
 }
 
 export type LessonDetailResponse = ApiEnvelope<LessonResponse>

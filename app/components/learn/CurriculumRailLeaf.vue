@@ -3,8 +3,12 @@ import type { LearnLeaf } from '~/composables/useLearnNavigation'
 import { leafToPath } from '~/composables/useLearnNavigation'
 import { formatDuration } from '~/utils/formatDuration'
 
+// CurriculumRailLeaf renders only lesson/topic leaves. Session leaves are
+// dispatched to <CurriculumRailSessionLeaf> by the rail (Phase 7.6).
+type LessonOrTopicLeaf = Extract<LearnLeaf, { kind: 'lesson' | 'topic' }>
+
 interface Props {
-  leaf: LearnLeaf
+  leaf: LessonOrTopicLeaf
   isCurrent: boolean
 }
 

@@ -431,6 +431,42 @@
     }
   },
   "learn": {
+    "session": {
+      "session_number": "Сесія {n}",
+      "session_label": "{title}",
+      "join_button": "Приєднатися",
+      "watch_recording_button": "Дивитися запис",
+      "live_now_banner": "В ефірі",
+      "join_window_opens_in": "Кімната відкриється за {countdown}",
+      "join_window_will_open_at": "Кімната відкриється {date}",
+      "session_completed": "Сесію завершено",
+      "session_cancelled": "Сесію скасовано",
+      "recording_pending": "Запис підготовлюється",
+      "recording_not_offered": "Запис не надається",
+      "recording_window_expired": "Доступ до запису завершено {date}",
+      "user_attended_badge": "Ви були присутні",
+      "back_to_course": "Назад до курсу",
+      "rail_status": {
+        "scheduled": "Заплановано",
+        "live": "В ефірі зараз",
+        "completed_attended": "Завершено",
+        "completed_recording_available": "Запис доступний",
+        "completed_no_recording": "Без запису",
+        "cancelled": "Скасовано"
+      },
+      "errors": {
+        "session_not_found": "Сесію не знайдено",
+        "not_enrolled": "Ви не записані на цей курс",
+        "session_cancelled": "Сесію скасовано",
+        "meeting_not_provisioned": "Кімната ще не налаштована. Спробуйте за хвилину.",
+        "join_window_not_open": "Кімната ще не відкрита",
+        "join_window_closed": "Час приєднання вийшов",
+        "recording_not_available": "Запис недоступний",
+        "recording_window_expired": "Доступ до запису завершено",
+        "network_error": "Помилка мережі",
+        "unknown": "Сталася невідома помилка"
+      }
+    },
     "layout": {
       "back_to_course": "До курсу",
       "back_to_course_loading": "Завантаження…",

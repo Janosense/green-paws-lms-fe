@@ -217,7 +217,7 @@ const cancelledAtLine = computed(() => {
           <h1 class="text-3xl font-medium tracking-tight">
             {{ webinar.title }}
           </h1>
-          <WebinarStatusBadge :status="webinar.status" />
+          <EventStatusBadge :status="webinar.status" />
         </div>
 
         <p
@@ -231,7 +231,7 @@ const cancelledAtLine = computed(() => {
           v-if="!isPast && !sessionCancelled && webinar.scheduled_start"
           class="text-sm text-muted"
         >
-          <WebinarCountdown
+          <EventCountdown
             :target="webinar.scheduled_start"
             format="long"
           />
@@ -250,14 +250,14 @@ const cancelledAtLine = computed(() => {
         v-else
         class="flex flex-wrap items-center gap-3"
       >
-        <WebinarJoinButton
+        <EventJoinButton
           v-if="isJoinWindowOpen"
-          :slug="slug"
+          :redirect-path="`/vl/v1/webinars/${slug}/join`"
           size="lg"
         />
-        <WebinarRecordingButton
+        <EventRecordingButton
           v-else-if="recordingAvailable"
-          :slug="slug"
+          :redirect-path="`/vl/v1/webinars/${slug}/recording`"
           size="lg"
         />
         <p

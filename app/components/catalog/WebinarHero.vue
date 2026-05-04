@@ -266,14 +266,14 @@ async function onCtaClick(): Promise<void> {
 
         <!-- Join / Recording use the dedicated redirect-aware buttons.
              Everything else funnels through the unified `onCtaClick`. -->
-        <WebinarJoinButton
+        <EventJoinButton
           v-if="state.kind === 'registered_join_window'"
-          :slug="webinar.slug"
+          :redirect-path="`/vl/v1/webinars/${webinar.slug}/join`"
           size="xl"
         />
-        <WebinarRecordingButton
+        <EventRecordingButton
           v-else-if="state.kind === 'registered_past_recording_available'"
-          :slug="webinar.slug"
+          :redirect-path="`/vl/v1/webinars/${webinar.slug}/recording`"
           size="xl"
         />
         <UButton

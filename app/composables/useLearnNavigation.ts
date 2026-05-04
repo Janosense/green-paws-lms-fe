@@ -1,20 +1,23 @@
 import type {
   CurriculumLessonNode,
   CurriculumResponse,
+  CurriculumSessionNode,
   CurriculumTopicNode
 } from '#shared/types/learn'
 
 /**
- * Phase 5.6 — pure helpers that walk a curriculum response in canonical
- * learning order to produce a flat list of leaves (lessons or topics) and
- * resolve prev/next neighbors for the lesson-player pagination + the
- * dashboard "Continue" deep-link.
+ * Phase 5.6 + 7.6 — pure helpers that walk a curriculum response in
+ * canonical learning order to produce a flat list of leaves
+ * (lessons / topics / cohort sessions) and resolve prev/next neighbors
+ * for the lesson-player pagination + the dashboard "Continue" deep-link.
  *
  * Mirrors the backend's `Learn/NextEntityResolver` algorithm conceptually,
  * not character-for-character: modules in `menu_order`, lessons within
  * each module in `menu_order`, then topics within each lesson in
- * `menu_order` when present (otherwise the lesson itself), and finally
- * orphan lessons.
+ * `menu_order` when present (otherwise the lesson itself), then orphan
+ * lessons, and finally — for cohort courses — top-level session leaves
+ * in `_vl_session_scheduled_start ASC` (already pre-sorted by the
+ * backend transformer; we keep their incoming order).
  */
 
 export type LearnLeaf
@@ -30,6 +33,12 @@ export type LearnLeaf
     topic: CurriculumTopicNode
     lessonSlug: string
     topicSlug: string
+    courseSlug: string
+  }
+  | {
+    kind: 'session'
+    session: CurriculumSessionNode
+    sessionSlug: string
     courseSlug: string
   }
 
@@ -77,14 +86,28 @@ export function flattenCurriculum(curriculum: CurriculumResponse): LearnLeaf[] {
     emitLessonLeaves(lesson, courseSlug, out)
   }
 
+  // Phase 7.4 backend pre-sorts sessions by `scheduled_start ASC`; preserve.
+  for (const session of curriculum.sessions) {
+    out.push({
+      kind: 'session',
+      session,
+      sessionSlug: session.slug,
+      courseSlug
+    })
+  }
+
   return out
 }
 
 export function leafToPath(leaf: LearnLeaf): string {
-  if (leaf.kind === 'topic') {
-    return `/learn/${leaf.lessonSlug}/${leaf.topicSlug}`
+  switch (leaf.kind) {
+    case 'topic':
+      return `/learn/${leaf.lessonSlug}/${leaf.topicSlug}`
+    case 'lesson':
+      return `/learn/${leaf.lessonSlug}`
+    case 'session':
+      return `/learn/sessions/${leaf.sessionSlug}`
   }
-  return `/learn/${leaf.lessonSlug}`
 }
 
 interface NeighborTriple {
@@ -128,28 +151,48 @@ export function neighborsByTopicSlug(
   return buildTriple(leaves, index)
 }
 
+export function neighborsBySessionSlug(
+  leaves: LearnLeaf[],
+  sessionSlug: string
+): NeighborTriple {
+  const index = leaves.findIndex(
+    leaf => leaf.kind === 'session' && leaf.sessionSlug === sessionSlug
+  )
+  return buildTriple(leaves, index)
+}
+
 /**
  * Resolve the URL the dashboard "Continue" button should route to.
  *
  * Prefers the server-computed `next_entity` hint from the curriculum
- * response (Phase 5.2). Falls back to the first non-completed leaf when
- * the hint is unexpectedly absent. Returns null when nothing remains —
- * caller decides whether to land the user on the course page instead.
+ * response (Phase 5.2 + 7.4 session arm). Falls back to the first
+ * non-completed leaf when the hint is unexpectedly absent. Returns null
+ * when nothing remains — caller decides whether to land the user on the
+ * course page instead.
  */
 export function continueUrl(curriculum: CurriculumResponse): string | null {
   const hint = curriculum.next_entity
   if (hint) {
-    if (hint.type === 'topic') {
-      return `/learn/${hint.lesson_slug}/${hint.slug}`
+    switch (hint.type) {
+      case 'topic':
+        return `/learn/${hint.lesson_slug}/${hint.slug}`
+      case 'lesson':
+        return `/learn/${hint.slug}`
+      case 'session':
+        return `/learn/sessions/${hint.slug}`
     }
-    return `/learn/${hint.slug}`
   }
 
   const leaves = flattenCurriculum(curriculum)
   const next = leaves.find((leaf) => {
-    const status
-      = leaf.kind === 'topic' ? leaf.topic.progress.status : leaf.lesson.progress.status
-    return status !== 'completed'
+    switch (leaf.kind) {
+      case 'topic':
+        return leaf.topic.progress.status !== 'completed'
+      case 'lesson':
+        return leaf.lesson.progress.status !== 'completed'
+      case 'session':
+        return !leaf.session.is_completed
+    }
   })
   return next ? leafToPath(next) : null
 }

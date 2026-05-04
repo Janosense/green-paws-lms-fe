@@ -5,6 +5,8 @@ import type {
 } from '#shared/types/learn'
 import type { LearnLeaf } from '~/composables/useLearnNavigation'
 
+type LessonOrTopicLeaf = Extract<LearnLeaf, { kind: 'lesson' | 'topic' }>
+
 interface Props {
   module: CurriculumModuleNode
   courseSlug: string
@@ -38,7 +40,7 @@ function isTopicCurrent(lesson: CurriculumLessonNode, topicSlug: string): boolea
   return lesson.slug === currentLessonSlug && topicSlug === currentTopicSlug
 }
 
-function lessonLeaf(lesson: CurriculumLessonNode): LearnLeaf {
+function lessonLeaf(lesson: CurriculumLessonNode): LessonOrTopicLeaf {
   return {
     kind: 'lesson',
     lesson,
