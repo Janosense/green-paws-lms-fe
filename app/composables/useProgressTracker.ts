@@ -41,12 +41,14 @@ export function useProgressTracker(options: UseProgressTrackerOptions) {
   const completionFiredThisSession = ref(false)
 
   const api = useApi()
+  const { isPreview } = useLessonPreview()
 
   let heartbeatTimer: number | null = null
   let isPlaying = false
   let attachedAdapter: VideoPlayerAdapter | null = null
 
   function send(eventType: ProgressEventType, positionSeconds: number | null, payload?: unknown): void {
+    if (isPreview.value) return
     const body = {
       entity_type: options.entityType,
       entity_id: options.entityId,
@@ -162,6 +164,7 @@ export function useProgressTracker(options: UseProgressTrackerOptions) {
   }
 
   function onBeforeUnload(): void {
+    if (isPreview.value) return
     const pos = readPosition()
     sendBeaconJson('/vl/v1/progress', {
       entity_type: options.entityType,

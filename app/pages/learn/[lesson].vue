@@ -9,7 +9,7 @@ import { isLearnNotFound, resolveLearnError } from '~/utils/resolveLearnError'
 
 definePageMeta({
   layout: 'learn',
-  middleware: 'auth'
+  middleware: 'learn'
 })
 
 const route = useRoute()
@@ -211,6 +211,7 @@ const neighbors = computed(() =>
       v-else-if="lesson"
       class="space-y-6"
     >
+      <PreviewBanner />
       <header class="space-y-3">
         <h1 class="text-2xl md:text-3xl font-medium tracking-tight">
           {{ lesson.title }}
