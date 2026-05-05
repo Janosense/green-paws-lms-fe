@@ -56,13 +56,20 @@ export default defineNuxtConfig({
     }
   },
 
-  // Phase 3.4: 5min SWR for landing pages — content is editorial and changes infrequently.
-  // Patterns are restricted to single-segment detail routes (`/courses/:slug`)
-  // so the `/courses` index payload doesn't collide with the
-  // `payload/courses/` directory the per-slug payloads need (ENOTDIR).
+  // Static deploy: prerender catalog detail pages at build time.
+  // SWR (the previous Phase 3.4 setting) requires a Nitro server, which a
+  // static host doesn't provide. Authenticated routes stay client-rendered
+  // via the SPA fallback (`nitro.prerender.failOnError: false`).
   routeRules: {
-    '/courses/*': { swr: 300 },
-    '/webinars/*': { swr: 300 }
+    '/courses/*': { prerender: true },
+    '/webinars/*': { prerender: true }
+  },
+
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      failOnError: false
+    }
   },
 
   compatibilityDate: '2026-04-22',
