@@ -108,10 +108,9 @@ const ctaUi = computed<CtaUi>(() => {
     case 'paid_blocked':
       return {
         labelKey: 'webinar.cta.paid_blocked',
-        icon: 'i-lucide-lock',
-        disabled: true,
+        icon: 'i-lucide-credit-card',
+        disabled: false,
         loading: false,
-        helperKey: 'webinar.cta.paid_blocked_tooltip',
         variant: 'paid'
       }
     case 'registration_not_open_yet':
@@ -180,6 +179,9 @@ async function onCtaClick(): Promise<void> {
   switch (state.value.kind) {
     case 'guest':
       await router.push({ path: '/login', query: { return_to: route.fullPath } })
+      return
+    case 'paid_blocked':
+      await router.push(`/checkout/${props.webinar.slug}?type=webinar`)
       return
     case 'register_ready':
       await performRegister('webinar.register_success')

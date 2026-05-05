@@ -72,7 +72,7 @@ const secondaryLine = computed<string>(() => {
   return t('landing.course.self_paced_secondary')
 })
 
-type CtaAction = 'login' | 'dashboard' | 'enroll' | 'none'
+type CtaAction = 'login' | 'dashboard' | 'enroll' | 'checkout' | 'none'
 type CtaColor = 'primary' | 'neutral'
 
 interface CtaState {
@@ -117,10 +117,10 @@ const cta = computed<CtaState>(() => {
 
   if (props.course.price > 0) {
     return {
-      label: t('enrollment.cta.paid_unavailable'),
-      disabled: true,
+      label: t('enrollment.cta.buy'),
+      disabled: false,
       color: 'primary',
-      action: 'none'
+      action: 'checkout'
     }
   }
 
@@ -186,6 +186,9 @@ async function onCtaClick() {
       return
     case 'dashboard':
       await navigateTo('/dashboard')
+      return
+    case 'checkout':
+      await navigateTo(`/checkout/${props.course.slug}?type=course`)
       return
     case 'enroll':
       await runEnroll()
