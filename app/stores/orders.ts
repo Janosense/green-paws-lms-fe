@@ -85,7 +85,7 @@ export const useOrdersStore = defineStore('orders', () => {
     status.value = 'loading'
     try {
       const response = await api.get<OrdersListResponse>('/vl/v1/orders/me')
-      items.value = response.items
+      items.value = Array.isArray(response?.items) ? response.items : []
       status.value = 'success'
       error.value = null
     } catch (caught) {

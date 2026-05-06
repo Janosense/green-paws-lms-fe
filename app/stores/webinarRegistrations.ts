@@ -60,7 +60,7 @@ export const useWebinarRegistrationsStore = defineStore('webinar-registrations',
       const response = await api.get<WebinarRegistrationsListResponse>(
         '/vl/v1/webinars/me?status=active&time_filter=all'
       )
-      items.value = response.registrations
+      items.value = Array.isArray(response?.registrations) ? response.registrations : []
       status.value = 'success'
       error.value = null
     } catch (caught) {

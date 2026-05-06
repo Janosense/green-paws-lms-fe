@@ -54,7 +54,7 @@ export const useEnrollmentsStore = defineStore('enrollments', () => {
     status.value = 'loading'
     try {
       const response = await api.get<EnrollmentsListResponse>('/vl/v1/enrollments/me')
-      items.value = response.data.items
+      items.value = Array.isArray(response?.data?.items) ? response.data.items : []
       status.value = 'success'
       error.value = null
     } catch (caught) {

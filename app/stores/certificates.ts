@@ -64,7 +64,7 @@ export const useCertificatesStore = defineStore('certificates', () => {
     status.value = 'loading'
     try {
       const response = await api.get<CertificatesListResponse>('/vl/v1/certificates/me')
-      items.value = response.data.items
+      items.value = Array.isArray(response?.data?.items) ? response.data.items : []
       status.value = 'ready'
       error.value = null
     } catch (caught) {
