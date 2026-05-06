@@ -123,6 +123,12 @@ function hasReveal(questionId: number): boolean {
           {{ t('quiz.results.passingThreshold', { threshold: state.attempt.passing_threshold }) }}
         </p>
         <p
+          v-if="state.attempt.best_score !== null"
+          class="text-sm text-muted"
+        >
+          {{ t('quiz.results.bestScore', { score: state.attempt.best_score }) }}
+        </p>
+        <p
           v-if="state.attempt.time_taken_seconds != null"
           class="text-sm text-muted"
         >
@@ -235,6 +241,8 @@ function hasReveal(questionId: number): boolean {
         color="primary"
         icon="i-lucide-rotate-ccw"
         :loading="isRetrying"
+        :disabled="state.attempt.attempts_remaining === 0"
+        :title="state.attempt.attempts_remaining === 0 ? t('quiz.results.attemptsExhausted') : undefined"
         @click="onTryAgain"
       >
         {{ t('quiz.results.tryAgain') }}

@@ -104,6 +104,8 @@ export type QuizAttemptStatus = 'in_progress' | 'submitted' | 'expired' | 'aband
 export interface QuizAttempt {
   id: number
   quiz_id: number
+  /** Phase 9.5 — live CPT title for the quiz; cosmetic only. */
+  quiz_title: string
   course_id: number
   status: QuizAttemptStatus
   started_at: string
@@ -118,6 +120,10 @@ export interface QuizAttempt {
   passed: boolean | null
   passing_threshold: number
   question_order: number[]
+  /** Phase 9.5 — null when `_vl_quiz_max_attempts` is 0 (unlimited). */
+  attempts_remaining: number | null
+  /** Phase 9.5 — highest score percentage across submitted attempts; null until first submit. */
+  best_score: number | null
 }
 
 export interface QuizAttemptStateResponse {

@@ -615,7 +615,8 @@
       "confirmFinishTitle": "Завершити quiz?",
       "confirmFinishBody": "Ви відповіли на {answered} з {total} запитань. Завершити quiz?",
       "confirmFinishConfirm": "Завершити",
-      "confirmFinishCancel": "Продовжити"
+      "confirmFinishCancel": "Продовжити",
+      "attemptsRemaining": "Спроб залишилось: {count}"
     },
     "results": {
       "passed": "Quiz пройдено",
@@ -623,6 +624,7 @@
       "expired": "Час вийшов",
       "scoreFormat": "{score} з {max}",
       "passingThreshold": "Прохідний бал: {threshold}%",
+      "bestScore": "Найкращий результат: {score}%",
       "timeTaken": "Витрачено часу: {time}",
       "review": "Детальний розбір",
       "yourAnswer": "Ваша відповідь",
@@ -630,6 +632,7 @@
       "correctHidden": "Правильна відповідь прихована",
       "explanation": "Пояснення",
       "tryAgain": "Спробувати ще",
+      "attemptsExhausted": "Ви використали всі спроби",
       "backToCourse": "Повернутися до курсу"
     },
     "input": {

@@ -166,11 +166,21 @@ const timerColor = computed<'error' | 'warning' | 'neutral'>(() => {
       <div class="flex items-start justify-between gap-3">
         <div class="space-y-1">
           <h1 class="text-2xl md:text-3xl font-medium tracking-tight">
-            {{ slug }}
+            {{ state.attempt.quiz_title || slug }}
           </h1>
-          <p class="text-sm text-muted">
-            {{ t('quiz.player.questionCount', { current: currentIndex + 1, total: totalCount }) }}
-          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="text-sm text-muted">
+              {{ t('quiz.player.questionCount', { current: currentIndex + 1, total: totalCount }) }}
+            </p>
+            <UBadge
+              v-if="state.attempt.attempts_remaining !== null"
+              :color="state.attempt.attempts_remaining <= 1 ? 'warning' : 'neutral'"
+              variant="subtle"
+              size="sm"
+            >
+              {{ t('quiz.player.attemptsRemaining', { count: state.attempt.attempts_remaining }) }}
+            </UBadge>
+          </div>
         </div>
 
         <UBadge
