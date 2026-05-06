@@ -1,11 +1,16 @@
 /**
- * Boot-time auth hydration. Runs on both server and client. Route middleware
- * always runs after plugins, so this plugin's effects are visible to auth.ts
- * and guest.ts without any explicit ordering hint beyond `dependsOn: ['pinia']`
- * (which guarantees the Pinia plugin has installed before we touch the store —
- * `enforce: 'pre'` here would actually make it run *before* Pinia and crash).
+ * Boot-time auth hydration. Client-only by design.
  *
- * Flow:
+ * The frontend SPA and the WP backend live on different origins (localhost:3001
+ * vs green-paws-lms-backend.ddev.site in dev), so the HttpOnly refresh cookie
+ * that vl-jwt-auth issues is scoped to the *backend* origin — it never lands
+ * in the request headers Nuxt's Node server sees. Running the boot refresh on
+ * SSR therefore always 401s, flips status to 'unauthenticated', and (worse)
+ * tricks the auth middleware into issuing a 302 to /login before the browser
+ * ever runs JS. We skip SSR entirely and let the client — which *does* see
+ * the cookie — drive it.
+ *
+ * Flow (client only):
  *   1. status -> 'loading'
  *   2. POST /vl-auth/v1/token/refresh — succeeds when the refresh cookie is
  *      live; populates the access token + user (the response embeds `user`).
@@ -20,6 +25,10 @@ export default defineNuxtPlugin({
   name: 'vl-auth',
   dependsOn: ['pinia'],
   async setup() {
+    if (import.meta.server) {
+      return
+    }
+
     const authStore = useAuthStore()
 
     if (authStore.status !== 'idle') {
