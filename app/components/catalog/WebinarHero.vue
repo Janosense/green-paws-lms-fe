@@ -315,6 +315,8 @@ async function onCtaClick(): Promise<void> {
         :cover="webinar.cover"
         fallback-icon="i-lucide-radio"
         :fallback-initial="initial"
+        loading="eager"
+        sizes="sm:100vw lg:50vw"
       />
     </div>
   </section>

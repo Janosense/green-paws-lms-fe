@@ -5,24 +5,34 @@ interface Props {
   cover: CardCover | null
   fallbackIcon: string
   fallbackInitial: string
+  loading?: 'lazy' | 'eager'
+  sizes?: string
 }
 
-const { cover, fallbackIcon, fallbackInitial } = defineProps<Props>()
+const {
+  cover,
+  fallbackIcon,
+  fallbackInitial,
+  loading = 'lazy',
+  sizes = 'sm:100vw md:50vw lg:33vw'
+} = defineProps<Props>()
 
 const resolvedSize = computed(() => cover?.card ?? cover?.full ?? cover?.thumbnail)
 </script>
 
 <template>
   <div class="relative aspect-video w-full overflow-hidden rounded-md bg-elevated">
-    <img
+    <NuxtImg
       v-if="resolvedSize"
       :src="resolvedSize.url"
       :width="resolvedSize.width"
       :height="resolvedSize.height"
+      :loading="loading"
+      :sizes="sizes"
+      format="webp"
       alt=""
-      loading="lazy"
       class="h-full w-full object-cover"
-    >
+    />
     <div
       v-else
       class="flex h-full w-full items-center justify-center bg-primary-50 dark:bg-primary-950/40"

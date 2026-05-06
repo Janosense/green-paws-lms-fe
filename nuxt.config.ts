@@ -4,12 +4,31 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@nuxt/fonts',
+    '@nuxt/image',
     '@nuxtjs/color-mode',
     '@nuxtjs/i18n',
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/eslint'
   ],
+
+  // Phase 9.7 — image optimisation. ipx is the default Node-side resizer
+  // bundled with Nuxt; production-host images come from the headless WP
+  // backend, so its origin is whitelisted under `domains`.
+  image: {
+    provider: 'ipx',
+    domains: ['green-paws-lms-backend.ddev.site'],
+    format: ['avif', 'webp'],
+    quality: 80,
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536
+    }
+  },
 
   ssr: true,
 

@@ -309,6 +309,8 @@ async function runEnroll() {
         :cover="course.cover"
         fallback-icon="i-lucide-book-open"
         :fallback-initial="initial"
+        loading="eager"
+        sizes="sm:100vw lg:50vw"
       />
     </div>
   </section>
