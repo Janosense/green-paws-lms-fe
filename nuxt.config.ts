@@ -75,13 +75,25 @@ export default defineNuxtConfig({
     }
   },
 
-  // Static deploy: prerender catalog detail pages at build time.
-  // SWR (the previous Phase 3.4 setting) requires a Nitro server, which a
-  // static host doesn't provide. Authenticated routes stay client-rendered
-  // via the SPA fallback (`nitro.prerender.failOnError: false`).
+  // Public catalog: prerendered at build time so Google / OpenGraph crawlers
+  // see real HTML. SWR (the previous Phase 3.4 setting) requires a Nitro
+  // server, which a static host doesn't provide.
+  //
+  // Authed surfaces are marked `ssr: false` so Nuxt ships a SPA shell and
+  // never tries to render them server-side. The vl-jwt-auth refresh cookie
+  // is HttpOnly + path-scoped to the *backend* origin, so a Node SSR pass
+  // can't see it cross-origin and would always render an "unauthenticated"
+  // shell — which then 302s to /login on hard reload before the browser
+  // gets to run the boot refresh. SPA mode sidesteps that entirely; the
+  // client-only `auth` middleware and `vl-auth` plugin do the real gate.
   routeRules: {
     '/courses/*': { prerender: true },
-    '/webinars/*': { prerender: true }
+    '/webinars/*': { prerender: true },
+    '/account/**': { ssr: false },
+    '/dashboard/**': { ssr: false },
+    '/learn/**': { ssr: false },
+    '/checkout/**': { ssr: false },
+    '/orders/**': { ssr: false }
   },
 
   nitro: {
