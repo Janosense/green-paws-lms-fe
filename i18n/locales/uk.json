@@ -503,7 +503,6 @@
         "title": "Не вдалося завантажити урок",
         "description_default": "Спробуйте оновити сторінку.",
         "description_not_enrolled": "Ви не записані на курс. Поверніться до сторінки курсу, щоб записатися.",
-        "description_prerequisite_not_completed": "Завершіть попередній урок, щоб отримати доступ до цього.",
         "description_unauthorized": "Вийшли з акаунту. Увійдіть знову.",
         "back_to_dashboard": "На дашборд",
         "back_to_course": "До курсу"

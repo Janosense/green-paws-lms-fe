@@ -15,9 +15,8 @@ const NOT_FOUND_CODES: ReadonlySet<string> = new Set([
   'course_unpublished'
 ])
 
-const ERROR_CODES: Readonly<Record<string, 'not_enrolled' | 'prerequisite_not_completed' | 'unauthorized'>> = {
+const ERROR_CODES: Readonly<Record<string, 'not_enrolled' | 'unauthorized'>> = {
   not_enrolled: 'not_enrolled',
-  prerequisite_not_completed: 'prerequisite_not_completed',
   rest_not_logged_in: 'unauthorized',
   rest_forbidden: 'unauthorized',
   unauthorized: 'unauthorized'
