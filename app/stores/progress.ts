@@ -1,6 +1,18 @@
 import { defineStore } from 'pinia'
 import type { ApiError } from '#shared/types/api'
-import type { CurriculumDetailResponse, CurriculumResponse } from '#shared/types/learn'
+import type {
+  CurriculumDetailResponse,
+  CurriculumLessonNode,
+  CurriculumResponse,
+  CurriculumTopicNode,
+  ProgressStatus
+} from '#shared/types/learn'
+
+type LeafEntityType = 'lesson' | 'topic'
+
+function statusRank(status: ProgressStatus): number {
+  return status === 'completed' ? 2 : status === 'in_progress' ? 1 : 0
+}
 
 export type ProgressLoadStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -84,8 +96,62 @@ export const useProgressStore = defineStore('progress', () => {
   }
 
   /**
-   * Force a re-fetch, bypassing the cache check. Used by Phase 5.6 after a
-   * "Mark complete" click to refresh the rail. No 5.4a callers.
+   * Optimistically advance the progress.status of a single lesson or topic
+   * in the cached curriculum so the rail icon flips immediately, before the
+   * authoritative refresh lands. No-op if the curriculum isn't cached yet,
+   * if the entity isn't found, or if the new status would be a downgrade
+   * (e.g. an in_progress view_start arriving after a completion).
+   */
+  function applyEntityStatus(
+    courseSlug: string,
+    entityType: LeafEntityType,
+    entityId: number,
+    nextStatus: ProgressStatus
+  ): void {
+    const curriculum = curricula.value[courseSlug]
+    if (!curriculum) return
+
+    const updateLeaf = (leaf: CurriculumLessonNode | CurriculumTopicNode): boolean => {
+      if (statusRank(nextStatus) <= statusRank(leaf.progress.status)) return false
+      leaf.progress = {
+        ...leaf.progress,
+        status: nextStatus,
+        completed_at: nextStatus === 'completed'
+          ? leaf.progress.completed_at ?? new Date().toISOString()
+          : leaf.progress.completed_at
+      }
+      return true
+    }
+
+    let mutated = false
+    const visit = (lesson: CurriculumLessonNode): void => {
+      if (entityType === 'lesson' && lesson.id === entityId) {
+        if (updateLeaf(lesson)) mutated = true
+      }
+      if (entityType === 'topic') {
+        for (const topic of lesson.topics) {
+          if (topic.id === entityId && updateLeaf(topic)) {
+            mutated = true
+            break
+          }
+        }
+      }
+    }
+
+    for (const module of curriculum.modules) {
+      for (const lesson of module.lessons) visit(lesson)
+    }
+    for (const lesson of curriculum.orphan_lessons) visit(lesson)
+
+    if (mutated) {
+      curricula.value = { ...curricula.value, [courseSlug]: { ...curriculum } }
+    }
+  }
+
+  /**
+   * Force a re-fetch, bypassing the cache check. Used after view_start /
+   * mark-complete events to reconcile rail icons and progress_pct against
+   * the authoritative server state.
    */
   function refreshCourse(slug: string): Promise<void> {
     currentCourseSlug.value = slug
@@ -113,6 +179,7 @@ export const useProgressStore = defineStore('progress', () => {
     // actions
     ensureCourseLoaded,
     refreshCourse,
+    applyEntityStatus,
     setCurrentCourse,
     clear
   }

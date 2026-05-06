@@ -104,7 +104,8 @@ const tracker = initialTopic
       entityId: initialTopic.id,
       durationSeconds: initialTopic.duration_seconds,
       initialProgress: initialTopic.progress,
-      videoAdapter: videoAdapterRef
+      videoAdapter: videoAdapterRef,
+      courseSlug: initialTopic.course.slug
     })
   : null
 

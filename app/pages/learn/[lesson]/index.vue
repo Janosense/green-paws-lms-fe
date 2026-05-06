@@ -100,7 +100,8 @@ const tracker = initialLesson
       entityId: initialLesson.id,
       durationSeconds: initialLesson.duration_seconds,
       initialProgress: initialLesson.progress,
-      videoAdapter: videoAdapterRef
+      videoAdapter: videoAdapterRef,
+      courseSlug: initialLesson.course.slug
     })
   : null
 

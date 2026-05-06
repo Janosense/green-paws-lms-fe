@@ -22,6 +22,13 @@ export interface UseProgressTrackerOptions {
   initialProgress: ProgressShape
   /** The mounted adapter; null until the player is ready (or always null for non-video). */
   videoAdapter: Ref<VideoPlayerAdapter | null>
+  /**
+   * Slug of the parent course. When provided, the tracker mirrors status
+   * transitions (view_start → in_progress, complete → completed) into the
+   * progress store so the curriculum-rail icon flips immediately, and
+   * triggers a background curriculum refresh to reconcile progress_pct.
+   */
+  courseSlug?: string
 }
 
 const HEARTBEAT_INTERVAL_MS = 30_000
@@ -42,6 +49,31 @@ export function useProgressTracker(options: UseProgressTrackerOptions) {
 
   const api = useApi()
   const { isPreview } = useLessonPreview()
+  const progressStore = useProgressStore()
+
+  const isLeafEntity = options.entityType === 'lesson' || options.entityType === 'topic'
+
+  function applyOptimisticStatus(nextStatus: 'in_progress' | 'completed'): void {
+    if (isPreview.value) return
+    if (!isLeafEntity) return
+    if (!options.courseSlug) return
+    progressStore.applyEntityStatus(
+      options.courseSlug,
+      options.entityType as 'lesson' | 'topic',
+      options.entityId,
+      nextStatus
+    )
+  }
+
+  function refreshCurriculumAfter(promise: Promise<unknown>): void {
+    if (isPreview.value) return
+    if (!isLeafEntity) return
+    if (!options.courseSlug) return
+    const slug = options.courseSlug
+    promise
+      .then(() => progressStore.refreshCourse(slug))
+      .catch(() => {})
+  }
 
   let heartbeatTimer: number | null = null
   let isPlaying = false
@@ -57,11 +89,24 @@ export function useProgressTracker(options: UseProgressTrackerOptions) {
       position_seconds: positionSeconds == null ? null : Math.max(0, Math.round(positionSeconds)),
       payload: payload ?? null
     }
-    api.post('/vl/v1/progress', body).catch((e: unknown) => {
+    const request = api.post('/vl/v1/progress', body)
+    request.catch((e: unknown) => {
       if (import.meta.dev) {
         console.warn('[progress-tracker] send failed', eventType, e)
       }
     })
+    if (eventType === 'complete') {
+      applyOptimisticStatus('completed')
+      // Reconcile after the POST so the rail header's progress_pct picks up
+      // the new completion. Chained (not parallel) to avoid the GET racing
+      // ahead of the POST and clobbering our optimistic state with the
+      // pre-completion server snapshot.
+      refreshCurriculumAfter(request)
+    } else if (eventType === 'view_start') {
+      // view_start doesn't move progress_pct, so the optimistic update is
+      // enough — skipping the curriculum re-fetch keeps the rail flicker-free.
+      applyOptimisticStatus('in_progress')
+    }
   }
 
   function emitViewStart(): void {
