@@ -17,7 +17,8 @@ const { t } = useI18n()
 const toast = useToast()
 const progressStore = useProgressStore()
 
-const SLUG_PATTERN = /^[a-z0-9-]+$/
+// Unicode-letter-aware: see `[topic].vue` for the rationale.
+const SLUG_PATTERN = /^[\p{L}\p{N}_-]+$/u
 
 const lessonSlug = computed<string>(() => {
   const raw = route.params.lesson

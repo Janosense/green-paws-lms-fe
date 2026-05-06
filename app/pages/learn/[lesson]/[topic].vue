@@ -17,7 +17,11 @@ const { t } = useI18n()
 const toast = useToast()
 const progressStore = useProgressStore()
 
-const SLUG_PATTERN = /^[a-z0-9-]+$/
+// Unicode-letter-aware: WP preserves the original locale in `post_name`
+// (Cyrillic course titles produce Cyrillic slugs), so an ASCII-only regex
+// would reject legitimate URLs. The backend remains the source of truth —
+// anything it can't resolve comes back as a clean 404.
+const SLUG_PATTERN = /^[\p{L}\p{N}_-]+$/u
 
 const lessonSlug = computed<string>(() => {
   const raw = route.params.lesson
