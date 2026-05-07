@@ -47,6 +47,17 @@ function emitLessonLeaves(
   courseSlug: string,
   out: LearnLeaf[]
 ): void {
+  // Always emit the lesson itself as a leaf so prev/next pagination treats
+  // the lesson page as a real station — the curriculum rail already lists
+  // the lesson page above its topics, and skipping it here used to make the
+  // "next" button on the previous lesson jump straight into the first
+  // topic, bypassing the new lesson's overview entirely.
+  out.push({
+    kind: 'lesson',
+    lesson,
+    lessonSlug: lesson.slug,
+    courseSlug
+  })
   if (lesson.has_topics && lesson.topics.length > 0) {
     const topics = [...lesson.topics].sort((a, b) => a.menu_order - b.menu_order)
     for (const topic of topics) {
@@ -59,14 +70,7 @@ function emitLessonLeaves(
         courseSlug
       })
     }
-    return
   }
-  out.push({
-    kind: 'lesson',
-    lesson,
-    lessonSlug: lesson.slug,
-    courseSlug
-  })
 }
 
 export function flattenCurriculum(curriculum: CurriculumResponse): LearnLeaf[] {
@@ -164,27 +168,24 @@ export function neighborsBySessionSlug(
 /**
  * Resolve the URL the dashboard "Continue" button should route to.
  *
- * Prefers the server-computed `next_entity` hint from the curriculum
- * response (Phase 5.2 + 7.4 session arm). Falls back to the first
- * non-completed leaf when the hint is unexpectedly absent. Returns null
- * when nothing remains — caller decides whether to land the user on the
- * course page instead.
+ * For a fresh enrollment (`progress_pct === 0`) we land on the first
+ * canonical leaf — which, thanks to `flattenCurriculum` always emitting
+ * the lesson page before its topics, is the lesson page itself rather
+ * than its first topic. This keeps the entry point consistent with the
+ * curriculum rail and the prev/next pagination.
  *
- * When the learner hasn't started the course yet (`progress_pct === 0`)
- * and the first leaf in canonical order is a topic, route to the parent
- * lesson rather than the topic. Rationale: dropping a fresh learner into
- * the first sub-topic skips the lesson's intro context; landing on the
- * lesson page lets them see the overview and walk into topics naturally.
- * Once any progress exists, we trust the server hint to resume position.
+ * Once any progress exists, prefer the server-computed `next_entity`
+ * hint (Phase 5.2 + 7.4 session arm) so the learner resumes exactly
+ * where they left off. Falls back to the first non-completed leaf when
+ * the hint is unexpectedly absent; returns null when nothing remains.
  */
 export function continueUrl(curriculum: CurriculumResponse): string | null {
+  const leaves = flattenCurriculum(curriculum)
+
   const notStarted = (curriculum.course.enrollment?.progress_pct ?? 0) === 0
   if (notStarted) {
-    const firstLeaf = flattenCurriculum(curriculum)[0]
+    const firstLeaf = leaves[0]
     if (firstLeaf) {
-      if (firstLeaf.kind === 'topic') {
-        return `/learn/${firstLeaf.lessonSlug}`
-      }
       return leafToPath(firstLeaf)
     }
   }
@@ -201,7 +202,6 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
     }
   }
 
-  const leaves = flattenCurriculum(curriculum)
   const next = leaves.find((leaf) => {
     switch (leaf.kind) {
       case 'topic':

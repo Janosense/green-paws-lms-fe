@@ -29,11 +29,11 @@ watch(containsCurrent, (next) => {
 })
 
 function isLessonCurrent(lesson: CurriculumLessonNode): boolean {
-  return (
-    lesson.slug === currentLessonSlug
-    && !currentTopicSlug
-    && !lesson.has_topics
-  )
+  // Lessons-with-topics now appear as their own pagination station
+  // (`/learn/{lessonSlug}`), so highlight the lesson row whenever the
+  // route is on the lesson page itself — the topic-slug guard already
+  // distinguishes from being on one of its children.
+  return lesson.slug === currentLessonSlug && !currentTopicSlug
 }
 
 function isTopicCurrent(lesson: CurriculumLessonNode, topicSlug: string): boolean {
