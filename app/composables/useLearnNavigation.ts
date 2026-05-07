@@ -169,8 +169,26 @@ export function neighborsBySessionSlug(
  * non-completed leaf when the hint is unexpectedly absent. Returns null
  * when nothing remains — caller decides whether to land the user on the
  * course page instead.
+ *
+ * When the learner hasn't started the course yet (`progress_pct === 0`)
+ * and the first leaf in canonical order is a topic, route to the parent
+ * lesson rather than the topic. Rationale: dropping a fresh learner into
+ * the first sub-topic skips the lesson's intro context; landing on the
+ * lesson page lets them see the overview and walk into topics naturally.
+ * Once any progress exists, we trust the server hint to resume position.
  */
 export function continueUrl(curriculum: CurriculumResponse): string | null {
+  const notStarted = (curriculum.course.enrollment?.progress_pct ?? 0) === 0
+  if (notStarted) {
+    const firstLeaf = flattenCurriculum(curriculum)[0]
+    if (firstLeaf) {
+      if (firstLeaf.kind === 'topic') {
+        return `/learn/${firstLeaf.lessonSlug}`
+      }
+      return leafToPath(firstLeaf)
+    }
+  }
+
   const hint = curriculum.next_entity
   if (hint) {
     switch (hint.type) {
