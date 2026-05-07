@@ -16,6 +16,7 @@
 // a brief flash is accepted (DECISIONS.md note for Phase 4.2).
 
 import type { CourseDetail } from '#shared/types/catalog'
+import { continueUrl } from '~/composables/useLearnNavigation'
 import { formatDuration } from '~/utils/formatDuration'
 import { formatPrice } from '~/utils/formatPrice'
 import { formatScheduledDate } from '~/utils/formatScheduledDate'
@@ -30,8 +31,10 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 const enrollmentsStore = useEnrollmentsStore()
+const progressStore = useProgressStore()
 
 const initial = computed(() => props.course.title.trim().charAt(0).toUpperCase())
 
@@ -192,7 +195,7 @@ async function onCtaClick() {
       await navigateTo({ path: '/login', query: { return_to: route.fullPath } })
       return
     case 'dashboard':
-      await navigateTo('/dashboard')
+      await runContinue()
       return
     case 'checkout':
       await navigateTo(`/checkout/${props.course.slug}?type=course`)
@@ -203,6 +206,22 @@ async function onCtaClick() {
     case 'none':
     default:
       return
+  }
+}
+
+// Resolve the next learnable leaf via the same path the dashboard card uses
+// (`continueUrl(curriculum)`), so the hero's Continue / Review CTA deep-links
+// straight into the lesson player. Falls back to the dashboard if the
+// curriculum can't be loaded so the user is never stranded on the landing.
+async function runContinue() {
+  isLoading.value = true
+  try {
+    await progressStore.ensureCourseLoaded(props.course.slug)
+    const curriculum = progressStore.curricula[props.course.slug]
+    const url = curriculum ? continueUrl(curriculum) : null
+    await router.push(url ?? '/dashboard')
+  } finally {
+    isLoading.value = false
   }
 }
 
