@@ -60,6 +60,13 @@ const priceLabel = computed(() => {
   return { value: formatPrice(props.webinar.price, props.webinar.currency), free: false }
 })
 
+// Paid webinar + any local registration record (active or cancelled) means
+// the user already paid; cancellation doesn't undo the purchase. Free
+// registrations stay on the price line, which already shows "Безкоштовно".
+const isPurchased = computed(() =>
+  props.webinar.price > 0 && store.getRegistration(props.webinar.slug) !== null
+)
+
 const now = useNow({ interval: 1000 })
 const capacityReached = ref(false)
 
@@ -259,7 +266,17 @@ async function onCtaClick(): Promise<void> {
         >
           {{ relativeLine }}
         </p>
+        <UBadge
+          v-if="isPurchased"
+          color="success"
+          variant="subtle"
+          size="lg"
+          icon="i-lucide-check-circle"
+        >
+          {{ t('webinar.purchased') }}
+        </UBadge>
         <p
+          v-else
           class="text-2xl font-semibold"
           :class="priceLabel.free ? 'text-muted' : 'text-default'"
         >

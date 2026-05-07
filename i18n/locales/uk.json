@@ -145,6 +145,7 @@
       "closed": "Реєстрацію закрито",
       "opens_at": "Реєстрація відкриється {date}"
     },
+    "purchased": "Придбано",
     "toast": {
       "enrolled": "Ви записались на курс"
     },
@@ -759,6 +760,7 @@
       "cancelled_registration_can_re_register": "Зареєструватися знову",
       "session_cancelled": "Вебінар скасовано"
     },
+    "purchased": "Придбано",
     "errors": {
       "webinar_not_found": "Вебінар не знайдено",
       "registration_not_open_yet": "Реєстрація ще не відкрилася",

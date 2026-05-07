@@ -47,6 +47,13 @@ const priceLabel = computed(() => {
   return { value: formatPrice(props.course.price, props.course.currency), free: false }
 })
 
+// A paid course with any local enrollment record means the user has paid for
+// it (free courses go through the same enrollment flow but don't count as a
+// purchase). Hide the price line and surface a "Придбано" badge instead.
+const isPurchased = computed(() =>
+  props.course.price > 0 && enrollmentsStore.getEnrollment(props.course.id) !== null
+)
+
 const startsAtLabel = computed(() => formatScheduledDate(
   props.course.starts_at,
   'scheduled',
@@ -279,7 +286,17 @@ async function runEnroll() {
       </div>
 
       <div class="space-y-3 pt-2">
+        <UBadge
+          v-if="isPurchased"
+          color="success"
+          variant="subtle"
+          size="lg"
+          icon="i-lucide-check-circle"
+        >
+          {{ t('enrollment.purchased') }}
+        </UBadge>
         <p
+          v-else
           class="text-2xl font-semibold"
           :class="priceLabel.free ? 'text-muted' : 'text-default'"
         >
