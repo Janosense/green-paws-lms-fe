@@ -266,15 +266,16 @@ async function onCtaClick(): Promise<void> {
         >
           {{ relativeLine }}
         </p>
-        <UBadge
-          v-if="isPurchased"
-          color="success"
-          variant="subtle"
-          size="lg"
-          icon="i-lucide-check-circle"
-        >
-          {{ t('webinar.purchased') }}
-        </UBadge>
+        <div v-if="isPurchased">
+          <UBadge
+            color="success"
+            variant="subtle"
+            size="lg"
+            icon="i-lucide-check-circle"
+          >
+            {{ t('webinar.purchased') }}
+          </UBadge>
+        </div>
         <p
           v-else
           class="text-2xl font-semibold"
