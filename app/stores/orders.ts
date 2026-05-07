@@ -124,7 +124,7 @@ export const useOrdersStore = defineStore('orders', () => {
     const api = useApi()
     const response = await api.post<OrderCreationResponse>('/vl/v1/orders', {
       entity_type,
-      entity_slug: slug
+      slug
     })
     upsertItem(response.order)
     return response
