@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { confirmPasswordResetSchema, type ConfirmPasswordResetFormValues } from '~/schemas/auth'
+import { buildConfirmPasswordResetSchema, type ConfirmPasswordResetFormValues } from '~/schemas/auth'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
@@ -30,6 +30,8 @@ const state = reactive<ConfirmPasswordResetFormValues>({
   password: '',
   password_confirmation: ''
 })
+
+const schema = computed(() => buildConfirmPasswordResetSchema(t))
 
 const errorTitleKey = computed(() => {
   if (errorCode.value === 'vl_lms_password_reset_token_expired') {
@@ -98,7 +100,7 @@ async function onSubmit(event: FormSubmitEvent<ConfirmPasswordResetFormValues>) 
       </div>
 
       <UForm
-        :schema="confirmPasswordResetSchema"
+        :schema="schema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"

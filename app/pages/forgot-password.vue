@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { requestPasswordResetSchema, type RequestPasswordResetFormValues } from '~/schemas/auth'
+import { buildRequestPasswordResetSchema, type RequestPasswordResetFormValues } from '~/schemas/auth'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
@@ -21,6 +21,8 @@ const isSubmitting = ref(false)
 const state = reactive<RequestPasswordResetFormValues>({
   email: ''
 })
+
+const schema = computed(() => buildRequestPasswordResetSchema(t))
 
 async function onSubmit(event: FormSubmitEvent<RequestPasswordResetFormValues>) {
   isSubmitting.value = true
@@ -65,7 +67,7 @@ async function onSubmit(event: FormSubmitEvent<RequestPasswordResetFormValues>) 
       </div>
 
       <UForm
-        :schema="requestPasswordResetSchema"
+        :schema="schema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"

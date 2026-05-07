@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { resendVerificationSchema, type ResendVerificationFormValues } from '~/schemas/auth'
+import { buildResendVerificationSchema, type ResendVerificationFormValues } from '~/schemas/auth'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
@@ -20,6 +20,8 @@ const isSubmitting = ref(false)
 const state = reactive<ResendVerificationFormValues>({
   email: ''
 })
+
+const schema = computed(() => buildResendVerificationSchema(t))
 
 async function onSubmit(event: FormSubmitEvent<ResendVerificationFormValues>) {
   isSubmitting.value = true
@@ -62,7 +64,7 @@ async function onSubmit(event: FormSubmitEvent<ResendVerificationFormValues>) {
       </div>
 
       <UForm
-        :schema="resendVerificationSchema"
+        :schema="schema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"

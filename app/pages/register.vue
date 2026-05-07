@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { registerSchema, type RegisterFormValues } from '~/schemas/auth'
+import { buildRegisterSchema, type RegisterFormValues } from '~/schemas/auth'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
@@ -31,6 +31,8 @@ const state = reactive<RegisterFormValues>({
   first_name: '',
   last_name: ''
 })
+
+const schema = computed(() => buildRegisterSchema(t))
 
 function startCooldown() {
   cooldown.value = RESEND_COOLDOWN_SECONDS
@@ -110,7 +112,7 @@ async function onResend() {
       </h1>
 
       <UForm
-        :schema="registerSchema"
+        :schema="schema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"

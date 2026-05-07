@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { loginSchema, type LoginFormValues } from '~/schemas/auth'
+import { buildLoginSchema, type LoginFormValues } from '~/schemas/auth'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
@@ -19,6 +19,8 @@ const state = reactive<LoginFormValues>({
   email: '',
   password: ''
 })
+
+const schema = computed(() => buildLoginSchema(t))
 
 const isSubmitting = ref(false)
 const lastErrorCode = ref<string | null>(null)
@@ -110,7 +112,7 @@ async function onResendVerification() {
       </UAlert>
 
       <UForm
-        :schema="loginSchema"
+        :schema="schema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"
