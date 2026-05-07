@@ -1,4 +1,4 @@
-# Phase 8.4 — Smoke Checklist
+# Phase 8.4 — Smoke Checklist.
 
 Manual verification recipes for the checkout + orders dashboard frontend.
 Run against a backend with at least one paid course and one paid webinar
