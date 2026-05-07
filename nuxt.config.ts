@@ -94,8 +94,8 @@ export default defineNuxtConfig({
   // reliably override. Rendering on the client lets `window.location` —
   // which is authoritative — drive the page.
   routeRules: {
-    '/courses/*': { prerender: true },
-    '/webinars/*': { prerender: true },
+    '/courses/*': { ssr: false },
+    '/webinars/*': { ssr: false },
     '/verify-email': { ssr: false },
     '/reset-password': { ssr: false },
     '/account/**': { ssr: false },
