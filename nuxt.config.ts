@@ -86,9 +86,18 @@ export default defineNuxtConfig({
   // shell — which then 302s to /login on hard reload before the browser
   // gets to run the boot refresh. SPA mode sidesteps that entirely; the
   // client-only `auth` middleware and `vl-auth` plugin do the real gate.
+  //
+  // /verify-email and /reset-password are also SPA-only: their entire payload
+  // is the `?token=…` query, but in same-origin production hosting the
+  // upstream rewrite can strip the query before Nuxt's SSR pass sees it,
+  // baking a "missing token" error view into the HTML that hydration can't
+  // reliably override. Rendering on the client lets `window.location` —
+  // which is authoritative — drive the page.
   routeRules: {
     '/courses/*': { prerender: true },
     '/webinars/*': { prerender: true },
+    '/verify-email': { ssr: false },
+    '/reset-password': { ssr: false },
     '/account/**': { ssr: false },
     '/dashboard/**': { ssr: false },
     '/learn/**': { ssr: false },
