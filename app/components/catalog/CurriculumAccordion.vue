@@ -25,18 +25,14 @@ function formatLessonDuration(seconds: number): string {
   return `${hours} ${t('landing.duration.hours_short')} ${minutes} ${t('landing.duration.minutes_short')}`
 }
 
-function moduleSummary(lessonsCount: number, durationMinutes: number): string {
-  const lessonsLabel = t('landing.course.lessons_count', { count: lessonsCount })
-  if (durationMinutes <= 0) {
-    return lessonsLabel
-  }
-  return `${lessonsLabel} · ${durationMinutes} ${t('landing.duration.minutes_short')}`
+function moduleSummary(lessonsCount: number): string {
+  return t('landing.course.lessons_count', { count: lessonsCount })
 }
 
 const items = computed<AccordionItem[]>(() =>
   props.curriculum.modules.map(module => ({
     label: module.title,
-    description: moduleSummary(module.lessons.length, module.duration_minutes),
+    description: moduleSummary(module.lessons.length),
     slot: `module-${module.id}` as const,
     value: String(module.id)
   }))

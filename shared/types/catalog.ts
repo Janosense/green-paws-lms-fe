@@ -135,9 +135,6 @@ export interface CurriculumLesson {
 export interface CurriculumModule {
   id: number
   title: string
-  duration_minutes: number
-  passing_threshold: number | null
-  intro_video_url: string
   lessons: CurriculumLesson[]
 }
 
