@@ -14,7 +14,7 @@
       <div class="w-full max-w-[400px] space-y-8">
         <div class="text-center">
           <AppWordmark
-            size="h-12"
+            size="h-20"
             :link="false"
           />
         </div>
