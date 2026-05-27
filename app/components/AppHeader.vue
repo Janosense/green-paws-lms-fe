@@ -61,6 +61,8 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
             to="/courses"
             variant="ghost"
             color="neutral"
+            active-color="primary"
+            active-variant="soft"
             size="sm"
             class="text-[14px]"
           >
@@ -70,6 +72,8 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
             to="/webinars"
             variant="ghost"
             color="neutral"
+            active-color="primary"
+            active-variant="soft"
             size="sm"
             class="text-[14px]"
           >
