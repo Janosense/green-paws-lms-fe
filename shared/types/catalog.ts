@@ -135,6 +135,7 @@ export interface CurriculumLesson {
 export interface CurriculumModule {
   id: number
   title: string
+  content: string
   lessons: CurriculumLesson[]
 }
 

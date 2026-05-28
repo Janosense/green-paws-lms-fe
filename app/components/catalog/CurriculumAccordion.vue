@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AccordionItem } from '@nuxt/ui'
-import type { Curriculum, CurriculumLesson } from '#shared/types/catalog'
+import type { Curriculum, CurriculumLesson, CurriculumModule } from '#shared/types/catalog'
 
 interface Props {
   curriculum: Curriculum
@@ -38,10 +38,13 @@ const items = computed<AccordionItem[]>(() =>
   }))
 )
 
-function lessonsForSlot(slot: string): CurriculumLesson[] {
+function moduleForSlot(slot: string): CurriculumModule | undefined {
   const id = Number(slot.replace(/^module-/, ''))
-  const found = props.curriculum.modules.find(m => m.id === id)
-  return found?.lessons ?? []
+  return props.curriculum.modules.find(m => m.id === id)
+}
+
+function lessonsForSlot(slot: string): CurriculumLesson[] {
+  return moduleForSlot(slot)?.lessons ?? []
 }
 
 const isEmpty = computed(() =>
@@ -71,6 +74,13 @@ const isEmpty = computed(() =>
         :key="module.id"
         #[`module-${module.id}`]
       >
+        <!-- eslint-disable vue/no-v-html -- Backend sanitises with the_content / wp_kses_post before sending. -->
+        <div
+          v-if="module.content"
+          class="prose-content text-sm py-2"
+          v-html="module.content"
+        />
+        <!-- eslint-enable vue/no-v-html -->
         <ul class="space-y-3 py-2">
           <li
             v-for="lesson in lessonsForSlot(`module-${module.id}`)"
