@@ -206,10 +206,10 @@ function changePage(nextPage: number) {
             class="flex justify-center pt-2"
           >
             <UPagination
-              :model-value="courses.pagination.page"
+              :page="courses.pagination.page"
               :items-per-page="courses.pagination.per_page"
               :total="courses.pagination.total"
-              @update:model-value="changePage"
+              @update:page="changePage"
             />
           </div>
         </section>
@@ -242,10 +242,10 @@ function changePage(nextPage: number) {
             class="flex justify-center pt-2"
           >
             <UPagination
-              :model-value="webinars.pagination.page"
+              :page="webinars.pagination.page"
               :items-per-page="webinars.pagination.per_page"
               :total="webinars.pagination.total"
-              @update:model-value="changePage"
+              @update:page="changePage"
             />
           </div>
         </section>

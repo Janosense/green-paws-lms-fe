@@ -301,10 +301,10 @@ function changePage(nextPage: number) {
               class="flex justify-center pt-4"
             >
               <UPagination
-                :model-value="pagination.page"
+                :page="pagination.page"
                 :items-per-page="pagination.per_page"
                 :total="pagination.total"
-                @update:model-value="changePage"
+                @update:page="changePage"
               />
             </div>
           </div>
