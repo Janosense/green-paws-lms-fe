@@ -186,6 +186,7 @@ export interface CurriculumLessonNode {
   has_topics: boolean
   progress: ProgressShape
   topics: CurriculumTopicNode[]
+  quizzes: CurriculumQuizNode[]
 }
 
 export interface CurriculumModuleNode {
@@ -194,6 +195,32 @@ export interface CurriculumModuleNode {
   title: string
   menu_order: number
   lessons: CurriculumLessonNode[]
+  quizzes: CurriculumQuizNode[]
+}
+
+/**
+ * Quiz status as surfaced to the curriculum rail. Distinct from
+ * `ProgressStatus` (which is lesson/topic-shaped): a quiz can be `failed`
+ * (every submitted attempt fell short) and is `passed` rather than
+ * `completed`.
+ */
+export type QuizRailStatus = 'passed' | 'failed' | 'in_progress' | 'not_started'
+
+/**
+ * A `vl_quiz` attached to a course, module, lesson, or session via
+ * `post_parent`. Surfaced as a tree leaf wherever attached. `status` and
+ * `best_score_pct` reflect the current user's standing on the quiz.
+ */
+export interface CurriculumQuizNode {
+  type: 'quiz'
+  id: number
+  slug: string
+  title: string
+  menu_order: number
+  is_final_exam: boolean
+  passing_threshold: number
+  status: QuizRailStatus
+  best_score_pct: number | null
 }
 
 /**
@@ -213,18 +240,21 @@ export interface CurriculumSessionNode {
   is_completed: boolean
   join_url_path: string
   recording_url_path: string | null
+  quizzes: CurriculumQuizNode[]
 }
 
 export type NextEntityHint
   = | { type: 'lesson', id: number, slug: string, lesson_slug: string }
     | { type: 'topic', id: number, slug: string, lesson_slug: string }
     | { type: 'session', id: number, slug: string, title: string, scheduled_start: string | null }
+    | { type: 'quiz', id: number, slug: string }
 
 export interface CurriculumResponse {
   course: CurriculumCourse
   modules: CurriculumModuleNode[]
   orphan_lessons: CurriculumLessonNode[]
   sessions: CurriculumSessionNode[]
+  course_quizzes: CurriculumQuizNode[]
   next_entity: NextEntityHint | null
 }
 

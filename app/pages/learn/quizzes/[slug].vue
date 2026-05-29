@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  flattenCurriculum,
+  neighborsByQuizSlug
+} from '~/composables/useLearnNavigation'
 import { resolveQuizError } from '~/utils/resolveQuizError'
 
 definePageMeta({
@@ -13,6 +17,7 @@ definePageMeta({
 
 const route = useRoute()
 const { t } = useI18n()
+const progressStore = useProgressStore()
 
 const slug = computed<string>(() => {
   const raw = route.params.slug
@@ -43,6 +48,26 @@ const isFinalized = computed(() => {
   const status = attempt.value?.attempt.status
   return status === 'submitted' || status === 'expired'
 })
+
+// Hydrate the surrounding course so the curriculum rail + prev/next
+// pagination resolve, even on a deep-linked quiz page. The attempt carries
+// its resolved course slug (Phase 9.11 backend addition).
+watch(
+  () => attempt.value?.attempt.course_slug ?? null,
+  (courseSlug) => {
+    if (courseSlug) {
+      void progressStore.ensureCourseLoaded(courseSlug)
+    }
+  },
+  { immediate: true }
+)
+
+const curriculum = computed(() => progressStore.currentCourse)
+const navigationLeaves = computed(() => {
+  const c = curriculum.value
+  return c ? flattenCurriculum(c) : []
+})
+const neighbors = computed(() => neighborsByQuizSlug(navigationLeaves.value, slug.value))
 
 useSeoMeta({
   title: () => t('quiz.player.seoTitle', { slug: slug.value }),
@@ -79,11 +104,20 @@ function onRetry(): void {
       </template>
     </QuizError>
 
-    <QuizResults
-      v-else-if="attempt && isFinalized"
-      :state="attempt"
-      :slug="slug"
-    />
+    <template v-else-if="attempt && isFinalized">
+      <QuizResults
+        :state="attempt"
+        :slug="slug"
+      />
+
+      <LearnPagination
+        v-if="curriculum && (neighbors.prev || neighbors.next)"
+        :prev="neighbors.prev"
+        :next="neighbors.next"
+        :next-highlighted="attempt.attempt.passed === true"
+        class="mt-12"
+      />
+    </template>
 
     <QuizPlayer
       v-else-if="attempt"

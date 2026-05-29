@@ -12,9 +12,10 @@ interface Props {
   courseSlug: string
   currentLessonSlug: string | null
   currentTopicSlug: string | null
+  currentQuizSlug: string | null
 }
 
-const { module, courseSlug, currentLessonSlug, currentTopicSlug } = defineProps<Props>()
+const { module, courseSlug, currentLessonSlug, currentTopicSlug, currentQuizSlug } = defineProps<Props>()
 
 const containsCurrent = computed(() =>
   module.lessons.some(lesson => lesson.slug === currentLessonSlug)
@@ -92,7 +93,20 @@ function lessonLeaf(lesson: CurriculumLessonNode): LessonOrTopicLeaf {
             :is-current="isTopicCurrent(lesson, topic.slug)"
           />
         </template>
+        <CurriculumRailQuizLeaf
+          v-for="quiz in lesson.quizzes"
+          :key="`quiz-${quiz.id}`"
+          :quiz="quiz"
+          :is-current="currentQuizSlug === quiz.slug"
+          nested
+        />
       </template>
+      <CurriculumRailQuizLeaf
+        v-for="quiz in module.quizzes"
+        :key="`module-quiz-${quiz.id}`"
+        :quiz="quiz"
+        :is-current="currentQuizSlug === quiz.slug"
+      />
     </div>
   </section>
 </template>

@@ -107,6 +107,8 @@ export interface QuizAttempt {
   /** Phase 9.5 — live CPT title for the quiz; cosmetic only. */
   quiz_title: string
   course_id: number
+  /** Course `post_name`; lets the quiz page hydrate the curriculum rail + pagination. */
+  course_slug: string
   status: QuizAttemptStatus
   started_at: string
   submitted_at: string | null

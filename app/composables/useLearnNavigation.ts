@@ -1,5 +1,6 @@
 import type {
   CurriculumLessonNode,
+  CurriculumQuizNode,
   CurriculumResponse,
   CurriculumSessionNode,
   CurriculumTopicNode
@@ -14,10 +15,13 @@ import type {
  * Mirrors the backend's `Learn/NextEntityResolver` algorithm conceptually,
  * not character-for-character: modules in `menu_order`, lessons within
  * each module in `menu_order`, then topics within each lesson in
- * `menu_order` when present (otherwise the lesson itself), then orphan
- * lessons, and finally — for cohort courses — top-level session leaves
- * in `_vl_session_scheduled_start ASC` (already pre-sorted by the
- * backend transformer; we keep their incoming order).
+ * `menu_order` when present (otherwise the lesson itself), then that
+ * lesson's attached quizzes, then the module's own quizzes; then orphan
+ * lessons; then — for cohort courses — top-level session leaves in
+ * `_vl_session_scheduled_start ASC` (already pre-sorted by the backend
+ * transformer; we keep their incoming order), each followed by its
+ * attached quizzes; and finally course-level quizzes (the common
+ * final-exam placement).
  */
 
 export type LearnLeaf
@@ -41,6 +45,28 @@ export type LearnLeaf
     sessionSlug: string
     courseSlug: string
   }
+  | {
+    kind: 'quiz'
+    quiz: CurriculumQuizNode
+    quizSlug: string
+    courseSlug: string
+  }
+
+function emitQuizLeaves(
+  quizzes: CurriculumQuizNode[],
+  courseSlug: string,
+  out: LearnLeaf[]
+): void {
+  const ordered = [...quizzes].sort((a, b) => a.menu_order - b.menu_order)
+  for (const quiz of ordered) {
+    out.push({
+      kind: 'quiz',
+      quiz,
+      quizSlug: quiz.slug,
+      courseSlug
+    })
+  }
+}
 
 function emitLessonLeaves(
   lesson: CurriculumLessonNode,
@@ -71,6 +97,8 @@ function emitLessonLeaves(
       })
     }
   }
+  // A lesson's own quizzes follow its content (after its topics, if any).
+  emitQuizLeaves(lesson.quizzes, courseSlug, out)
 }
 
 export function flattenCurriculum(curriculum: CurriculumResponse): LearnLeaf[] {
@@ -83,6 +111,7 @@ export function flattenCurriculum(curriculum: CurriculumResponse): LearnLeaf[] {
     for (const lesson of lessons) {
       emitLessonLeaves(lesson, courseSlug, out)
     }
+    emitQuizLeaves(module.quizzes, courseSlug, out)
   }
 
   const orphans = [...curriculum.orphan_lessons].sort((a, b) => a.menu_order - b.menu_order)
@@ -98,7 +127,11 @@ export function flattenCurriculum(curriculum: CurriculumResponse): LearnLeaf[] {
       sessionSlug: session.slug,
       courseSlug
     })
+    emitQuizLeaves(session.quizzes, courseSlug, out)
   }
+
+  // Course-level quizzes sit last — the common final-exam placement.
+  emitQuizLeaves(curriculum.course_quizzes, courseSlug, out)
 
   return out
 }
@@ -111,6 +144,8 @@ export function leafToPath(leaf: LearnLeaf): string {
       return `/learn/${leaf.lessonSlug}`
     case 'session':
       return `/learn/sessions/${leaf.sessionSlug}`
+    case 'quiz':
+      return `/learn/quizzes/${leaf.quizSlug}`
   }
 }
 
@@ -165,6 +200,16 @@ export function neighborsBySessionSlug(
   return buildTriple(leaves, index)
 }
 
+export function neighborsByQuizSlug(
+  leaves: LearnLeaf[],
+  quizSlug: string
+): NeighborTriple {
+  const index = leaves.findIndex(
+    leaf => leaf.kind === 'quiz' && leaf.quizSlug === quizSlug
+  )
+  return buildTriple(leaves, index)
+}
+
 /**
  * Resolve the URL the dashboard "Continue" button should route to.
  *
@@ -199,6 +244,8 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
         return `/learn/${hint.slug}`
       case 'session':
         return `/learn/sessions/${hint.slug}`
+      case 'quiz':
+        return `/learn/quizzes/${hint.slug}`
     }
   }
 
@@ -210,6 +257,8 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
         return leaf.lesson.progress.status !== 'completed'
       case 'session':
         return !leaf.session.is_completed
+      case 'quiz':
+        return leaf.quiz.status !== 'passed'
     }
   })
   return next ? leafToPath(next) : null

@@ -481,7 +481,10 @@
       "course_label": "Курс",
       "progress_label": "{pct}% завершено",
       "module_label": "Модуль",
-      "no_topics_hint": "Немає тем"
+      "no_topics_hint": "Немає тем",
+      "quiz_label": "Тест",
+      "final_exam": "Підсумковий тест",
+      "quiz_score": "{pct}%"
     },
     "pagination": {
       "label": "Навігація уроку",

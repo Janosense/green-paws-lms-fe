@@ -27,6 +27,18 @@ const currentSessionSlug = computed<string | null>(() => {
   return value ? String(value) : null
 })
 
+// `/learn/quizzes/[slug]` exposes the slug as `route.params.slug` under the
+// `learn-quizzes-slug` route name; match only that so it can't collide with
+// the session-leaf slug.
+const currentQuizSlug = computed<string | null>(() => {
+  if (route.name !== 'learn-quizzes-slug') {
+    return null
+  }
+  const raw = route.params.slug
+  const value = Array.isArray(raw) ? raw[0] : raw
+  return value ? String(value) : null
+})
+
 const curriculum = computed(() => progressStore.currentCourse)
 </script>
 
@@ -80,32 +92,64 @@ const curriculum = computed(() => progressStore.currentCourse)
           :course-slug="curriculum.course.slug"
           :current-lesson-slug="currentLessonSlug"
           :current-topic-slug="currentTopicSlug"
+          :current-quiz-slug="currentQuizSlug"
         />
         <div
           v-if="curriculum.orphan_lessons.length"
           class="pt-2 space-y-0.5"
         >
-          <CurriculumRailLeaf
+          <template
             v-for="lesson in curriculum.orphan_lessons"
             :key="lesson.id"
-            :leaf="{
-              kind: 'lesson',
-              lesson,
-              lessonSlug: lesson.slug,
-              courseSlug: curriculum.course.slug
-            }"
-            :is-current="currentLessonSlug === lesson.slug && !currentTopicSlug"
-          />
+          >
+            <CurriculumRailLeaf
+              :leaf="{
+                kind: 'lesson',
+                lesson,
+                lessonSlug: lesson.slug,
+                courseSlug: curriculum.course.slug
+              }"
+              :is-current="currentLessonSlug === lesson.slug && !currentTopicSlug"
+            />
+            <CurriculumRailQuizLeaf
+              v-for="quiz in lesson.quizzes"
+              :key="`quiz-${quiz.id}`"
+              :quiz="quiz"
+              :is-current="currentQuizSlug === quiz.slug"
+              nested
+            />
+          </template>
         </div>
         <div
           v-if="curriculum.sessions.length"
           class="pt-2 space-y-0.5"
         >
-          <CurriculumRailSessionLeaf
+          <template
             v-for="session in curriculum.sessions"
             :key="session.id"
-            :session="session"
-            :is-current="currentSessionSlug === session.slug"
+          >
+            <CurriculumRailSessionLeaf
+              :session="session"
+              :is-current="currentSessionSlug === session.slug"
+            />
+            <CurriculumRailQuizLeaf
+              v-for="quiz in session.quizzes"
+              :key="`quiz-${quiz.id}`"
+              :quiz="quiz"
+              :is-current="currentQuizSlug === quiz.slug"
+              nested
+            />
+          </template>
+        </div>
+        <div
+          v-if="curriculum.course_quizzes.length"
+          class="pt-2 space-y-0.5"
+        >
+          <CurriculumRailQuizLeaf
+            v-for="quiz in curriculum.course_quizzes"
+            :key="quiz.id"
+            :quiz="quiz"
+            :is-current="currentQuizSlug === quiz.slug"
           />
         </div>
       </template>

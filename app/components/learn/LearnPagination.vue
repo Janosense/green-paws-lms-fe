@@ -20,6 +20,8 @@ function leafTitle(leaf: LearnLeaf): string {
       return leaf.lesson.title
     case 'session':
       return leaf.session.title
+    case 'quiz':
+      return leaf.quiz.title
   }
 }
 </script>
