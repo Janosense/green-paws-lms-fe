@@ -216,7 +216,7 @@ async function onCtaClick(): Promise<void> {
 
       <p
         v-if="webinar.excerpt"
-        class="text-lg text-muted leading-relaxed line-clamp-3"
+        class="text-lg text-muted leading-relaxed"
       >
         {{ webinar.excerpt }}
       </p>

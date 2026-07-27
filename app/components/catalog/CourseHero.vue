@@ -263,7 +263,7 @@ async function runEnroll() {
 
       <p
         v-if="course.excerpt"
-        class="text-lg text-muted leading-relaxed line-clamp-3"
+        class="text-lg text-muted leading-relaxed"
       >
         {{ course.excerpt }}
       </p>
