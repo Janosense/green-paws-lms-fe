@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LearnLeaf } from '~/composables/useLearnNavigation'
-import { leafToPath } from '~/composables/useLearnNavigation'
+import { isLeafLocked, leafToPath } from '~/composables/useLearnNavigation'
 
 interface Props {
   prev: LearnLeaf | null
@@ -11,6 +11,17 @@ interface Props {
 
 const { prev, next, nextHighlighted } = defineProps<Props>()
 const { t } = useI18n()
+
+// The next stop is shown even when locked — that is exactly the moment the
+// learner needs to understand why they have stopped. It just does not
+// navigate: dropping `to` rather than relying on `disabled` alone keeps
+// UButton from rendering a still-clickable anchor.
+const nextLocked = computed(() => (next ? isLeafLocked(next) : false))
+// Everything before the frontier is open, so this should never fire.
+// Handled symmetrically rather than assumed.
+const prevLocked = computed(() => (prev ? isLeafLocked(prev) : false))
+
+const highlightNext = computed(() => nextHighlighted && !nextLocked.value)
 
 function leafTitle(leaf: LearnLeaf): string {
   switch (leaf.kind) {
@@ -34,8 +45,9 @@ function leafTitle(leaf: LearnLeaf): string {
   >
     <UButton
       v-if="prev"
-      :to="leafToPath(prev)"
-      icon="i-lucide-arrow-left"
+      :to="prevLocked ? undefined : leafToPath(prev)"
+      :disabled="prevLocked"
+      :icon="prevLocked ? 'i-lucide-lock' : 'i-lucide-arrow-left'"
       variant="ghost"
       color="neutral"
       class="flex-1 justify-start"
@@ -52,18 +64,19 @@ function leafTitle(leaf: LearnLeaf): string {
 
     <UButton
       v-if="next"
-      :to="leafToPath(next)"
-      trailing-icon="i-lucide-arrow-right"
-      :variant="nextHighlighted ? 'solid' : 'ghost'"
-      :color="nextHighlighted ? 'primary' : 'neutral'"
+      :to="nextLocked ? undefined : leafToPath(next)"
+      :disabled="nextLocked"
+      :trailing-icon="nextLocked ? 'i-lucide-lock' : 'i-lucide-arrow-right'"
+      :variant="highlightNext ? 'solid' : 'ghost'"
+      :color="highlightNext ? 'primary' : 'neutral'"
       class="flex-1 justify-end"
     >
       <span class="flex flex-col items-end text-end min-w-0">
         <span
           class="text-xs"
-          :class="nextHighlighted ? 'opacity-80' : 'text-muted'"
+          :class="highlightNext ? 'opacity-80' : 'text-muted'"
         >
-          {{ t('learn.pagination.next') }}
+          {{ nextLocked ? t('learn.pagination.locked') : t('learn.pagination.next') }}
         </span>
         <span class="text-sm truncate max-w-xs">{{ leafTitle(next) }}</span>
       </span>

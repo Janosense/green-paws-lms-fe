@@ -1,5 +1,6 @@
 import type {
   CurriculumLessonNode,
+  CurriculumNodeLock,
   CurriculumQuizNode,
   CurriculumResponse,
   CurriculumSessionNode,
@@ -136,6 +137,29 @@ export function flattenCurriculum(curriculum: CurriculumResponse): LearnLeaf[] {
   return out
 }
 
+/**
+ * The lock the backend stamped on this leaf, or null when it is open.
+ *
+ * Sessions are never locked — the backend types their `lock` as the
+ * literal `null` — so the arm exists only to keep the switch exhaustive.
+ */
+export function leafLock(leaf: LearnLeaf): CurriculumNodeLock | null {
+  switch (leaf.kind) {
+    case 'lesson':
+      return leaf.lesson.lock
+    case 'topic':
+      return leaf.topic.lock
+    case 'quiz':
+      return leaf.quiz.lock
+    case 'session':
+      return null
+  }
+}
+
+export function isLeafLocked(leaf: LearnLeaf): boolean {
+  return leafLock(leaf) !== null
+}
+
 export function leafToPath(leaf: LearnLeaf): string {
   switch (leaf.kind) {
     case 'topic':
@@ -229,14 +253,22 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
 
   const notStarted = (curriculum.course.enrollment?.progress_pct ?? 0) === 0
   if (notStarted) {
-    const firstLeaf = leaves[0]
-    if (firstLeaf) {
-      return leafToPath(firstLeaf)
+    // Normally leaves[0], but a course whose very first quiz gates the rest
+    // can have a locked opening leaf — deep-linking into it would land the
+    // learner on a 403.
+    const firstOpen = leaves.find(leaf => !isLeafLocked(leaf))
+    if (firstOpen) {
+      return leafToPath(firstOpen)
     }
   }
 
   const hint = curriculum.next_entity
-  if (hint) {
+  const hintLeaf = hint ? leaves.find(leaf => matchesHint(leaf, hint)) : undefined
+  // The hint is usually safe — everything before the frontier is open, so the
+  // first not-completed stop lands on or before it. The exception is a quiz
+  // flagged "requires all course quizzes", which is gated regardless of its
+  // position and can therefore sit earlier than the quizzes it waits on.
+  if (hint && (!hintLeaf || !isLeafLocked(hintLeaf))) {
     switch (hint.type) {
       case 'topic':
         return `/learn/${hint.lesson_slug}/${hint.slug}`
@@ -250,6 +282,9 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
   }
 
   const next = leaves.find((leaf) => {
+    if (isLeafLocked(leaf)) {
+      return false
+    }
     switch (leaf.kind) {
       case 'topic':
         return leaf.topic.progress.status !== 'completed'
@@ -262,4 +297,17 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
     }
   })
   return next ? leafToPath(next) : null
+}
+
+function matchesHint(leaf: LearnLeaf, hint: NonNullable<CurriculumResponse['next_entity']>): boolean {
+  switch (hint.type) {
+    case 'topic':
+      return leaf.kind === 'topic' && leaf.topic.id === hint.id
+    case 'lesson':
+      return leaf.kind === 'lesson' && leaf.lesson.id === hint.id
+    case 'session':
+      return leaf.kind === 'session' && leaf.session.id === hint.id
+    case 'quiz':
+      return leaf.kind === 'quiz' && leaf.quiz.id === hint.id
+  }
 }

@@ -15,8 +15,18 @@ const NOT_FOUND_CODES: ReadonlySet<string> = new Set([
   'course_unpublished'
 ])
 
-const ERROR_CODES: Readonly<Record<string, 'not_enrolled' | 'unauthorized'>> = {
+/**
+ * `progression_locked` is deliberately absent from `NOT_FOUND_CODES` above:
+ * the backend answers 403, and routing it to `<NotFound />` would tell an
+ * enrolled learner that a lesson sitting in their own curriculum rail does
+ * not exist.
+ */
+const ERROR_CODES: Readonly<
+  Record<string, 'not_enrolled' | 'unauthorized' | 'progression_locked' | 'course_quizzes_incomplete'>
+> = {
   not_enrolled: 'not_enrolled',
+  progression_locked: 'progression_locked',
+  course_quizzes_incomplete: 'course_quizzes_incomplete',
   rest_not_logged_in: 'unauthorized',
   rest_forbidden: 'unauthorized',
   unauthorized: 'unauthorized'

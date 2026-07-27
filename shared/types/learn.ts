@@ -166,6 +166,36 @@ export interface CurriculumCourse {
   enrollment: EnrollmentBlock | null
 }
 
+/**
+ * Why a curriculum entity is closed to the current learner.
+ *
+ * Computed server-side and emitted per node — the frontend renders it and
+ * never recomputes it. Reproducing the rule here would mean transcribing
+ * the canonical curriculum order a third time (see
+ * `useLearnNavigation.flattenCurriculum`), and the client copy would be
+ * advisory anyway: `LessonAccessGate` / `QuizAccessGate` are what actually
+ * refuse the request.
+ *
+ * - `progression_locked` — an earlier quiz flagged "blocks progression"
+ *   has not been passed. `blocking_quiz` names it.
+ * - `course_quizzes_incomplete` — this quiz requires every other non-final
+ *   quiz in the course to be passed first. `remaining_quiz_count` says how
+ *   many are outstanding; there is no single quiz to name.
+ */
+export type CurriculumLockReason = 'progression_locked' | 'course_quizzes_incomplete'
+
+export interface CurriculumBlockingQuiz {
+  id: number
+  slug: string
+  title: string
+}
+
+export interface CurriculumNodeLock {
+  reason: CurriculumLockReason
+  blocking_quiz: CurriculumBlockingQuiz | null
+  remaining_quiz_count: number
+}
+
 export interface CurriculumTopicNode {
   id: number
   slug: string
@@ -173,6 +203,7 @@ export interface CurriculumTopicNode {
   menu_order: number
   duration_seconds: number
   progress: ProgressShape
+  lock: CurriculumNodeLock | null
 }
 
 export interface CurriculumLessonNode {
@@ -185,6 +216,7 @@ export interface CurriculumLessonNode {
   requires_completion: boolean
   has_topics: boolean
   progress: ProgressShape
+  lock: CurriculumNodeLock | null
   topics: CurriculumTopicNode[]
   quizzes: CurriculumQuizNode[]
 }
@@ -221,6 +253,7 @@ export interface CurriculumQuizNode {
   passing_threshold: number
   status: QuizRailStatus
   best_score_pct: number | null
+  lock: CurriculumNodeLock | null
 }
 
 /**
@@ -240,6 +273,12 @@ export interface CurriculumSessionNode {
   is_completed: boolean
   join_url_path: string
   recording_url_path: string | null
+  /**
+   * Always `null`. A cohort session is a scheduled call with its own join
+   * window, so progression gating never closes one — the literal type keeps
+   * that invariant checkable. Its `quizzes` are lockable as normal.
+   */
+  lock: null
   quizzes: CurriculumQuizNode[]
 }
 

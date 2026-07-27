@@ -484,12 +484,16 @@
       "no_topics_hint": "Немає тем",
       "quiz_label": "Тест",
       "final_exam": "Підсумковий тест",
-      "quiz_score": "{pct}%"
+      "quiz_score": "{pct}%",
+      "locked_by_quiz": "Складіть тест «{quiz}», щоб відкрити",
+      "locked_prerequisites": "Складіть усі тести курсу, щоб відкрити",
+      "locked_generic": "Ще недоступно"
     },
     "pagination": {
       "label": "Навігація уроку",
       "prev": "Попередній",
-      "next": "Наступний"
+      "next": "Наступний",
+      "locked": "Заблоковано"
     },
     "lesson": {
       "section": {
@@ -509,7 +513,9 @@
         "description_not_enrolled": "Ви не записані на курс. Поверніться до сторінки курсу, щоб записатися.",
         "description_unauthorized": "Вийшли з акаунту. Увійдіть знову.",
         "back_to_dashboard": "На дашборд",
-        "back_to_course": "До курсу"
+        "back_to_course": "До курсу",
+        "description_progression_locked": "Цей урок відкриється після того, як ви успішно складете попередній тест курсу.",
+        "description_course_quizzes_incomplete": "Спочатку складіть усі тести курсу."
       },
       "not_found": {
         "title": "Урок не знайдено",
@@ -530,7 +536,9 @@
         "description_not_enrolled": "Ви не записані на курс. Поверніться до сторінки курсу, щоб записатися.",
         "description_unauthorized": "Вийшли з акаунту. Увійдіть знову.",
         "back_to_dashboard": "На дашборд",
-        "back_to_lesson": "До уроку"
+        "back_to_lesson": "До уроку",
+        "description_progression_locked": "Ця тема відкриється після того, як ви успішно складете попередній тест курсу.",
+        "description_course_quizzes_incomplete": "Спочатку складіть усі тести курсу."
       },
       "not_found": {
         "title": "Тему не знайдено",
@@ -677,7 +685,9 @@
       "alreadyFinalized": "Тест вже завершено.",
       "invalidQuestion": "Невідоме запитання. Оновіть сторінку.",
       "invalidAnswer": "Відповідь у неправильному форматі.",
-      "internal": "Сталася помилка. Спробуйте ще раз."
+      "internal": "Сталася помилка. Спробуйте ще раз.",
+      "progressionLocked": "Цей тест ще недоступний. Спочатку складіть попередній тест курсу.",
+      "courseQuizzesIncomplete": "Щоб скласти цей тест, спочатку складіть усі інші тести курсу."
     }
   },
   "certificate": {

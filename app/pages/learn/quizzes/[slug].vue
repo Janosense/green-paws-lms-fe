@@ -62,6 +62,24 @@ watch(
   { immediate: true }
 )
 
+// Passing a quiz can unlock the rest of the course, but the rail renders
+// from the cached curriculum snapshot and does not self-update — so without
+// this the learner sees their newly-opened lessons still greyed out until a
+// manual reload. Watched at page level rather than inside the quizAttempt
+// store to avoid store-to-store coupling; `useProgressTracker` calls
+// `refreshCourse` the same way. Also fires on a fresh load of an
+// already-passed attempt, which is a harmless refetch that keeps the rail
+// honest.
+watch(
+  () => [attempt.value?.attempt.passed === true, attempt.value?.attempt.course_slug ?? null] as const,
+  ([passed, courseSlug]) => {
+    if (passed && courseSlug) {
+      void progressStore.refreshCourse(courseSlug)
+    }
+  },
+  { immediate: true }
+)
+
 const curriculum = computed(() => progressStore.currentCourse)
 const navigationLeaves = computed(() => {
   const c = curriculum.value

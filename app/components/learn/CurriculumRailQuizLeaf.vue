@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CurriculumQuizNode } from '#shared/types/learn'
+import { useCurriculumLock } from '~/composables/useCurriculumLock'
 
 interface Props {
   quiz: CurriculumQuizNode
@@ -18,7 +19,14 @@ interface Visual {
   colorClass: string
 }
 
+const { isLocked, tooltipText } = useCurriculumLock(() => quiz.lock)
+
+// The padlock outranks the status glyph: a locked quiz the learner has
+// never sat would otherwise read as merely "not started".
 const visual = computed<Visual>(() => {
+  if (isLocked.value) {
+    return { icon: 'i-lucide-lock', colorClass: 'text-muted' }
+  }
   switch (quiz.status) {
     case 'passed':
       return { icon: 'i-lucide-circle-check-big', colorClass: 'text-success' }
@@ -44,7 +52,27 @@ const trailingLabel = computed(() => {
 </script>
 
 <template>
+  <UTooltip
+    v-if="isLocked"
+    :text="tooltipText"
+  >
+    <div
+      class="flex items-center gap-2 pe-3 py-2 text-sm rounded-md text-muted opacity-60 cursor-not-allowed"
+      :class="indentClass"
+      aria-disabled="true"
+    >
+      <UIcon
+        :name="visual.icon"
+        class="size-4 shrink-0"
+        :class="visual.colorClass"
+      />
+      <span class="truncate flex-1">{{ quiz.title }}</span>
+      <span class="text-xs text-muted shrink-0">{{ trailingLabel }}</span>
+      <span class="sr-only">{{ tooltipText }}</span>
+    </div>
+  </UTooltip>
   <NuxtLink
+    v-else
     :to="path"
     class="flex items-center gap-2 pe-3 py-2 text-sm rounded-md transition-colors"
     :class="[

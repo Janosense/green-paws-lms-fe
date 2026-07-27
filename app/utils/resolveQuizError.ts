@@ -34,7 +34,9 @@ const FATAL_CODES = new Set<string>([
   'quiz_not_in_course',
   'not_enrolled',
   'attempts_exhausted',
-  'attempt_not_found'
+  'attempt_not_found',
+  'progression_locked',
+  'course_quizzes_incomplete'
 ])
 
 const FINALIZED_CODES = new Set<string>([
@@ -52,6 +54,8 @@ const KEY_BY_CODE: Readonly<Record<string, string>> = {
   quiz_not_in_course: 'quiz.errors.misconfigured',
   not_enrolled: 'quiz.errors.notEnrolled',
   attempts_exhausted: 'quiz.errors.attemptsExhausted',
+  progression_locked: 'quiz.errors.progressionLocked',
+  course_quizzes_incomplete: 'quiz.errors.courseQuizzesIncomplete',
   attempt_not_found: 'quiz.errors.attemptNotFound',
   attempt_expired: 'quiz.errors.expired',
   attempt_already_finalized: 'quiz.errors.alreadyFinalized',

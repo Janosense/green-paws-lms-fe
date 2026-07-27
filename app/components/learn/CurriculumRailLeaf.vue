@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { LearnLeaf } from '~/composables/useLearnNavigation'
-import { leafToPath } from '~/composables/useLearnNavigation'
+import { leafLock, leafToPath } from '~/composables/useLearnNavigation'
+import { useCurriculumLock } from '~/composables/useCurriculumLock'
 import { formatDuration } from '~/utils/formatDuration'
 
 // CurriculumRailLeaf renders only lesson/topic leaves. Session leaves are
@@ -29,7 +30,12 @@ const status = computed(() =>
   leaf.kind === 'topic' ? leaf.topic.progress.status : leaf.lesson.progress.status
 )
 
+const { isLocked, tooltipText } = useCurriculumLock(() => leafLock(leaf))
+
 const iconName = computed(() => {
+  if (isLocked.value) {
+    return 'i-lucide-lock'
+  }
   switch (status.value) {
     case 'completed':
       return 'i-lucide-check-circle-2'
@@ -41,6 +47,9 @@ const iconName = computed(() => {
 })
 
 const iconColorClass = computed(() => {
+  if (isLocked.value) {
+    return 'text-muted'
+  }
   switch (status.value) {
     case 'completed':
       return 'text-success'
@@ -66,7 +75,31 @@ const path = computed(() => leafToPath(leaf))
 </script>
 
 <template>
+  <!--
+    A locked row stays visible so the learner can see what is ahead, but
+    renders as a non-navigating div: the backend would 403 the request
+    anyway, and a dead link that looks live is worse than one that says why.
+  -->
+  <UTooltip
+    v-if="isLocked"
+    :text="tooltipText"
+  >
+    <div
+      class="flex items-center gap-2 pe-3 py-2 text-sm rounded-md text-muted opacity-60 cursor-not-allowed"
+      :class="indentClass"
+      aria-disabled="true"
+    >
+      <UIcon
+        :name="iconName"
+        class="size-4 shrink-0"
+        :class="iconColorClass"
+      />
+      <span class="truncate flex-1">{{ title }}</span>
+      <span class="sr-only">{{ tooltipText }}</span>
+    </div>
+  </UTooltip>
   <NuxtLink
+    v-else
     :to="path"
     class="flex items-center gap-2 pe-3 py-2 text-sm rounded-md transition-colors"
     :class="[
