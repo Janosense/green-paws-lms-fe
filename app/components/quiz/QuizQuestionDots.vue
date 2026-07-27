@@ -39,7 +39,7 @@ function onJump(index: number): void {
 
 <template>
   <nav
-    class="flex flex-wrap gap-2 overflow-x-auto pb-1"
+    class="flex flex-wrap gap-2 overflow-x-auto p-1"
     :aria-label="t('quiz.player.questionsNav')"
   >
     <button
