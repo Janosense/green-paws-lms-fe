@@ -641,6 +641,19 @@
       "attemptsExhausted": "Ви використали всі спроби",
       "backToCourse": "Повернутися до курсу"
     },
+    "history": {
+      "title": "Історія спроб",
+      "summaryPassed": "Спроб: {total}. Тест складено з {attempt}-ї спроби.",
+      "summaryNotPassed": "Спроб: {total}. Тест ще не складено.",
+      "expand": "Показати всі спроби",
+      "collapse": "Згорнути",
+      "attemptNumber": "Спроба {n}",
+      "statusPassed": "складено",
+      "statusFailed": "не складено",
+      "statusExpired": "час вийшов",
+      "statusInProgress": "триває",
+      "scoreFormat": "{score} з {max} ({percent}%)"
+    },
     "input": {
       "trueFalse": {
         "true": "Так",

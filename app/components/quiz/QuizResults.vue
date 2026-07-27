@@ -137,6 +137,11 @@ function hasReveal(questionId: number): boolean {
       </div>
     </UCard>
 
+    <QuizAttemptHistoryPanel
+      :slug="slug"
+      :current-attempt-id="state.attempt.id"
+    />
+
     <section class="space-y-4">
       <h2 class="text-lg font-medium">
         {{ t('quiz.results.review') }}

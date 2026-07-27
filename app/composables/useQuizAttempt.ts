@@ -1,6 +1,7 @@
 import type { ApiError } from '#shared/types/api'
 import type {
   AnswerData,
+  QuizAttemptHistoryResponse,
   QuizAttemptStateResponse,
   QuizSaveAnswerResponse
 } from '#shared/types/quiz'
@@ -26,6 +27,12 @@ export function useQuizAttempt(slug: MaybeRefOrGetter<string>) {
 
   const error = computed<ApiError | null>(() => store.errors[toValue(slug)] ?? null)
 
+  const history = computed<QuizAttemptHistoryResponse | null>(() =>
+    store.attemptHistory(toValue(slug))
+  )
+
+  const isHistoryLoading = computed<boolean>(() => store.isHistoryLoading(toValue(slug)))
+
   function start(): Promise<QuizAttemptStateResponse> {
     return store.start(toValue(slug))
   }
@@ -38,12 +45,19 @@ export function useQuizAttempt(slug: MaybeRefOrGetter<string>) {
     return store.submit(toValue(slug))
   }
 
+  function fetchHistory(): Promise<QuizAttemptHistoryResponse> {
+    return store.fetchHistory(toValue(slug))
+  }
+
   return {
     state,
     isLoading,
     error,
+    history,
+    isHistoryLoading,
     start,
     saveAnswer,
-    submit
+    submit,
+    fetchHistory
   }
 }

@@ -144,3 +144,57 @@ export interface QuizSaveAnswerResponse {
 }
 
 export type QuizSaveAnswerEnvelope = ApiEnvelope<QuizSaveAnswerResponse>
+
+// ----------------------------------------------------------------------
+// Attempt history
+// ----------------------------------------------------------------------
+
+/**
+ * One row of `GET /vl/v1/quizzes/{slug}/attempts`.
+ *
+ * Leaner than {@link QuizAttempt}: no `question_order` and no
+ * `time_remaining_seconds`, both of which only mean something for the
+ * attempt currently loaded in the player. `score_percent` is derived
+ * backend-side so the client can compare against `passing_threshold`
+ * (a percentage) without redoing the division per row.
+ */
+export interface QuizAttemptHistoryEntry {
+  id: number
+  /** 1-based, chronological. Attempt 1 is the learner's first sitting. */
+  attempt_number: number
+  status: QuizAttemptStatus
+  started_at: string
+  submitted_at: string | null
+  score: number | null
+  max_score: number
+  /** Null when never scored or the snapshot carried no points. */
+  score_percent: number | null
+  /** Null while `in_progress`. */
+  passed: boolean | null
+  passing_threshold: number
+  time_taken_seconds: number | null
+}
+
+export interface QuizAttemptHistoryResponse {
+  quiz_id: number
+  quiz_title: string
+  /** 0 when the learner has no attempts — there is no row to read it off. */
+  course_id: number
+  course_slug: string
+  /** 0 = unlimited. */
+  max_attempts: number
+  /** Null when unlimited. */
+  attempts_remaining: number | null
+  /** Every sitting, including still-open ones. */
+  total_attempts: number
+  /** Sittings in a terminal state (`submitted` + `expired`). */
+  graded_attempts: number
+  /** Highest percentage across `submitted` attempts; null until the first. */
+  best_score: number | null
+  passed: boolean
+  /** `attempt_number` of the first passing sitting; null if never passed. */
+  passed_on_attempt: number | null
+  attempts: QuizAttemptHistoryEntry[]
+}
+
+export type QuizAttemptHistoryEnvelope = ApiEnvelope<QuizAttemptHistoryResponse>

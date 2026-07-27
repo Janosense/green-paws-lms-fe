@@ -3,6 +3,7 @@ import type { ApiError, ApiEnvelope } from '#shared/types/api'
 import type {
   AnswerData,
   QuizAttempt,
+  QuizAttemptHistoryResponse,
   QuizAttemptStateResponse,
   QuizSavedAnswer,
   QuizSaveAnswerResponse
@@ -34,8 +35,11 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
   const attempts = ref<Record<string, QuizAttemptStateResponse>>({})
   const status = ref<Record<string, QuizAttemptStatus>>({})
   const errors = ref<Record<string, ApiError | null>>({})
+  const history = ref<Record<string, QuizAttemptHistoryResponse>>({})
+  const historyLoading = ref<Record<string, boolean>>({})
 
   const inFlightStarts = new Map<string, Promise<QuizAttemptStateResponse>>()
+  const inFlightHistory = new Map<string, Promise<QuizAttemptHistoryResponse>>()
 
   // ---------------------------------------------------------------- getters
 
@@ -46,6 +50,14 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
   function isLoading(slug: string): boolean {
     const s = status.value[slug]
     return s === 'starting' || s === 'submitting'
+  }
+
+  function attemptHistory(slug: string): QuizAttemptHistoryResponse | null {
+    return history.value[slug] ?? null
+  }
+
+  function isHistoryLoading(slug: string): boolean {
+    return historyLoading.value[slug] === true
   }
 
   function getSavedAnswer(slug: string, questionId: number): QuizSavedAnswer | null {
@@ -202,6 +214,42 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
     }
   }
 
+  /**
+   * Load the learner's attempt log for a quiz.
+   *
+   * Single-flight like `start()`: the results screen mounts the history
+   * panel while other components may also ask, and one round-trip is
+   * enough. Failures are swallowed into `null` rather than thrown — the
+   * log is supplementary to the results already on screen, so a failed
+   * fetch should collapse the panel, not break the page. `errors[slug]`
+   * is deliberately left alone for the same reason: it drives the
+   * player's error branch, and a history hiccup must not trip it.
+   */
+  async function performFetchHistory(slug: string): Promise<QuizAttemptHistoryResponse> {
+    const api = useApi()
+    historyLoading.value = { ...historyLoading.value, [slug]: true }
+    try {
+      const envelope = await api.get<ApiEnvelope<QuizAttemptHistoryResponse>>(
+        `/vl/v1/quizzes/${slug}/attempts`
+      )
+      history.value = { ...history.value, [slug]: envelope.data }
+      return envelope.data
+    } finally {
+      historyLoading.value = { ...historyLoading.value, [slug]: false }
+    }
+  }
+
+  function fetchHistory(slug: string): Promise<QuizAttemptHistoryResponse> {
+    const existing = inFlightHistory.get(slug)
+    if (existing) return existing
+
+    const promise = performFetchHistory(slug).finally(() => {
+      inFlightHistory.delete(slug)
+    })
+    inFlightHistory.set(slug, promise)
+    return promise
+  }
+
   async function submit(slug: string): Promise<QuizAttemptStateResponse> {
     const cached = attempts.value[slug]
     if (!cached) {
@@ -218,6 +266,10 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
       setAttempt(slug, envelope.data)
       setStatus(slug, 'loaded')
       setError(slug, null)
+      // This submit is itself a new history row. Drop the cached log so the
+      // results screen's panel fetches one that includes the attempt the
+      // learner is looking at, rather than the log as of before it.
+      invalidateHistory(slug)
       return envelope.data
     } catch (caught) {
       setStatus(slug, 'error')
@@ -226,11 +278,18 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
     }
   }
 
+  function invalidateHistory(slug: string): void {
+    history.value = filteredOut(history.value, slug)
+  }
+
   function clear(slug: string): void {
     attempts.value = filteredOut(attempts.value, slug)
     status.value = filteredOut(status.value, slug)
     errors.value = filteredOut(errors.value, slug)
+    history.value = filteredOut(history.value, slug)
+    historyLoading.value = filteredOut(historyLoading.value, slug)
     inFlightStarts.delete(slug)
+    inFlightHistory.delete(slug)
   }
 
   function filteredOut<T>(record: Record<string, T>, key: string): Record<string, T> {
@@ -246,7 +305,10 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
     attempts.value = {}
     status.value = {}
     errors.value = {}
+    history.value = {}
+    historyLoading.value = {}
     inFlightStarts.clear()
+    inFlightHistory.clear()
   }
 
   // ---------------------------------------------------------------- internals
@@ -292,15 +354,21 @@ export const useQuizAttemptStore = defineStore('quizAttempt', () => {
     attempts,
     status,
     errors,
+    history,
+    historyLoading,
     // getters / accessors
     currentAttempt,
     isLoading,
     getSavedAnswer,
+    attemptHistory,
+    isHistoryLoading,
     // actions
     start,
     fetchState,
     saveAnswer,
     submit,
+    fetchHistory,
+    invalidateHistory,
     clear,
     clearAll
   }
