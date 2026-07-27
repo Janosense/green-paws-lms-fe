@@ -208,7 +208,7 @@ onMounted(() => {
 
     <div
       v-if="props.config?.rubric"
-      class="rounded-md bg-elevated p-3 text-sm prose prose-sm max-w-none [&_a]:text-primary"
+      class="vl-rich-text rounded-md bg-elevated p-3 text-sm"
       v-html="props.config.rubric"
     />
 

@@ -85,3 +85,199 @@
     --duration-slow: 0.01ms;
   }
 }
+
+/* ──────────────────────────────────────────────────────────
+   Rich text — WP-authored markup rendered through `v-html`
+   ──────────────────────────────────────────────────────────
+   Tailwind's preflight zeroes the very things editors rely on:
+   `h1`–`h6` lose their size and weight, `p` loses its margins, and
+   `ul` / `ol` lose both their markers and their indent. Anything
+   arriving as an opaque HTML string therefore lands on the page as a
+   single undifferentiated block of text — nothing inside it carries a
+   class we could style with a utility.
+
+   `.vl-rich-text` puts that formatting back. It deliberately sets no
+   base `font-size` / `line-height` / `color`, so the host element keeps
+   owning its own scale (a 15px lesson body, a 14px table cell, a `text-lg`
+   pull quote) and the class composes onto any of them. Sizes follow the
+   type scale in DESIGN-SYSTEM.md §3.2.
+   ────────────────────────────────────────────────────────── */
+@layer components {
+  /* Vertical rhythm between siblings only — a single-element fragment
+     (one paragraph, one table cell) picks up no stray outer margin. */
+  .vl-rich-text > * + * {
+    margin-top: 1rem;
+  }
+
+  .vl-rich-text :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: 500;
+    color: var(--ui-text-highlighted);
+    scroll-margin-top: 5rem;
+  }
+
+  .vl-rich-text h1 { font-size: 2rem;      line-height: 1.15; letter-spacing: -0.015em; }
+  .vl-rich-text h2 { font-size: 1.5rem;    line-height: 1.25; letter-spacing: -0.01em; }
+  .vl-rich-text h3 { font-size: 1.1875rem; line-height: 1.35; letter-spacing: -0.005em; }
+  .vl-rich-text h4 { font-size: 1rem;      line-height: 1.4; }
+  .vl-rich-text h5 { font-size: 0.9375rem; line-height: 1.5; }
+  .vl-rich-text h6 { font-size: 0.875rem;  line-height: 1.5; color: var(--ui-text-muted); }
+
+  /* A heading opens a new section: breathe above it, hug what follows.
+     Order matters — heading-after-heading must land on the tighter gap,
+     so the "after a heading" rule comes second and wins the tie. */
+  .vl-rich-text > * + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 2rem;
+  }
+
+  .vl-rich-text > :is(h1, h2, h3, h4, h5, h6) + * {
+    margin-top: 0.5rem;
+  }
+
+  /* Lists — markers and indent both come back. */
+  .vl-rich-text :is(ul, ol) {
+    padding-inline-start: 1.5rem;
+    list-style-position: outside;
+  }
+
+  .vl-rich-text ul { list-style-type: disc; }
+  .vl-rich-text ol { list-style-type: decimal; }
+  .vl-rich-text ul ul { list-style-type: circle; }
+  .vl-rich-text ul ul ul { list-style-type: square; }
+  .vl-rich-text ol ol { list-style-type: lower-alpha; }
+  .vl-rich-text ol ol ol { list-style-type: lower-roman; }
+
+  .vl-rich-text li::marker {
+    color: var(--ui-text-muted);
+  }
+
+  .vl-rich-text li + li {
+    margin-top: 0.375rem;
+  }
+
+  .vl-rich-text li > :is(ul, ol) {
+    margin-top: 0.375rem;
+  }
+
+  /* Rhythm inside the containers that can hold block children of their
+     own — the `> * + *` rule above only reaches direct children. */
+  .vl-rich-text :is(li, blockquote, td, th, figcaption, details) > * + * {
+    margin-top: 0.5rem;
+  }
+
+  /* Inline marks */
+  .vl-rich-text a {
+    color: var(--ui-primary);
+    text-underline-offset: 2px;
+  }
+
+  .vl-rich-text a:hover {
+    text-decoration: underline;
+  }
+
+  .vl-rich-text :is(strong, b) {
+    font-weight: 600;
+    color: var(--ui-text-highlighted);
+  }
+
+  .vl-rich-text :is(em, i) { font-style: italic; }
+  .vl-rich-text s { text-decoration: line-through; }
+  .vl-rich-text u { text-decoration: underline; text-underline-offset: 2px; }
+
+  .vl-rich-text mark {
+    background-color: var(--color-brand-100);
+    color: var(--ui-text-highlighted);
+    padding-inline: 0.15em;
+    border-radius: var(--radius-sm);
+  }
+
+  .dark .vl-rich-text mark {
+    background-color: var(--color-brand-900);
+  }
+
+  .vl-rich-text :is(sub, sup) { font-size: 0.75em; line-height: 0; }
+  .vl-rich-text sub { vertical-align: sub; }
+  .vl-rich-text sup { vertical-align: super; }
+
+  /* Code — `:not(pre) >` keeps the inline pill off code inside a block. */
+  .vl-rich-text :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.125rem 0.25rem;
+    background-color: var(--ui-bg-elevated);
+    border-radius: var(--radius-sm);
+  }
+
+  .vl-rich-text pre {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    padding: 0.75rem 1rem;
+    background-color: var(--ui-bg-elevated);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+  }
+
+  /* Blockquote — serif, per DESIGN-SYSTEM.md §3.1. */
+  .vl-rich-text blockquote {
+    font-family: var(--font-serif);
+    font-style: italic;
+    padding-inline-start: 1.25rem;
+    border-inline-start: 4px solid var(--color-brand-200);
+  }
+
+  .dark .vl-rich-text blockquote {
+    border-inline-start-color: var(--color-brand-700);
+  }
+
+  .vl-rich-text blockquote cite {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-style: normal;
+    color: var(--ui-text-muted);
+  }
+
+  /* Media */
+  .vl-rich-text :is(img, video, iframe) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .vl-rich-text figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--ui-text-muted);
+    text-align: center;
+  }
+
+  /* Tables */
+  .vl-rich-text table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .vl-rich-text :is(th, td) {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--ui-border);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .vl-rich-text th {
+    font-weight: 500;
+    background-color: var(--ui-bg-elevated);
+  }
+
+  /* Separator */
+  .vl-rich-text hr {
+    border: 0;
+    border-top: 1px solid var(--ui-border);
+  }
+
+  .vl-rich-text > hr {
+    margin-block: 2rem;
+  }
+}

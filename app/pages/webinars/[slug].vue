@@ -120,7 +120,7 @@ useStructuredData(structuredData.value)
           <!-- eslint-disable vue/no-v-html -->
           <div
             v-if="detail.content"
-            class="prose-content"
+            class="vl-rich-text"
             v-html="detail.content"
           />
           <!-- eslint-enable vue/no-v-html -->
@@ -147,49 +147,3 @@ useStructuredData(structuredData.value)
     </div>
   </UContainer>
 </template>
-
-<style scoped>
-.prose-content :deep(h2) {
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  letter-spacing: -0.005em;
-}
-.prose-content :deep(h3) {
-  font-size: 1.05rem;
-  font-weight: 500;
-  margin-top: 1.25em;
-  margin-bottom: 0.5em;
-}
-.prose-content :deep(p) {
-  margin-bottom: 1em;
-  line-height: 1.6;
-}
-.prose-content :deep(ul),
-.prose-content :deep(ol) {
-  padding-left: 1.5em;
-  margin-bottom: 1em;
-  line-height: 1.6;
-}
-.prose-content :deep(ul) {
-  list-style: disc;
-}
-.prose-content :deep(ol) {
-  list-style: decimal;
-}
-.prose-content :deep(a) {
-  color: var(--ui-primary);
-  text-decoration: underline;
-}
-.prose-content :deep(strong) {
-  font-weight: 600;
-}
-.prose-content :deep(blockquote) {
-  border-left: 2px solid var(--ui-border);
-  padding-left: 1em;
-  font-style: italic;
-  color: var(--ui-text-muted);
-  margin: 1em 0;
-}
-</style>

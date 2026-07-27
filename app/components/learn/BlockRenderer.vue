@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // Phase 5.4b — block dispatcher.
-// Prose typography: Option A (utility-only, no @tailwindcss/typography plugin).
-// Per-block components own their own classes; the parent controls vertical rhythm
+// Prose typography: Option A (no @tailwindcss/typography plugin). Per-block
+// components own their own scale utilities and share `.vl-rich-text` from
+// app/assets/css/main.css for anything reached through v-html, where the
+// markup carries no classes of its own. The parent controls vertical rhythm
 // via space-y-6 and an optional reading-width cap is applied by the page.
 //
 // Dispatch strategy: v-if ladder over block.type. Verbose, but each branch fully

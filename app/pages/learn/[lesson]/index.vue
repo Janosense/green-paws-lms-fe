@@ -257,7 +257,7 @@ const neighbors = computed(() =>
           @error="onPlayerError"
         />
         <template #fallback>
-          <div class="not-prose mb-6">
+          <div class="mb-6">
             <USkeleton class="aspect-video w-full rounded-lg" />
           </div>
         </template>

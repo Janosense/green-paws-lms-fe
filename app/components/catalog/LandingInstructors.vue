@@ -44,7 +44,7 @@ const hasAny = computed(() => props.instructors.length > 0)
           <!-- eslint-disable vue/no-v-html -->
           <div
             v-if="instructor.bio"
-            class="prose-content text-sm"
+            class="vl-rich-text text-sm"
             v-html="instructor.bio"
           />
           <!-- eslint-enable vue/no-v-html -->

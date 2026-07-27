@@ -22,7 +22,7 @@ const { t } = useI18n()
     <!-- eslint-disable vue/no-v-html -->
     <figcaption
       v-if="block.caption"
-      class="mt-2 text-sm text-muted text-center [&_a]:text-primary [&_a:hover]:underline"
+      class="vl-rich-text mt-2 text-sm text-muted text-center"
       v-html="block.caption"
     />
     <!-- eslint-enable vue/no-v-html -->

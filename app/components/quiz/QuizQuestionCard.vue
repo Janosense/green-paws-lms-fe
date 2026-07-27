@@ -145,7 +145,7 @@ onMounted(() => {
       </p>
       <!-- eslint-disable-next-line vue/no-v-html -- Backend sanitises with wp_kses_post before sending. -->
       <div
-        class="prose prose-sm max-w-none"
+        class="vl-rich-text text-sm"
         v-html="question.explanation"
       />
     </div>

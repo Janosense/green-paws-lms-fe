@@ -77,7 +77,7 @@ const isEmpty = computed(() =>
         <!-- eslint-disable vue/no-v-html -- Backend sanitises with the_content / wp_kses_post before sending. -->
         <div
           v-if="module.content"
-          class="prose-content text-sm py-2"
+          class="vl-rich-text text-sm py-2"
           v-html="module.content"
         />
         <!-- eslint-enable vue/no-v-html -->

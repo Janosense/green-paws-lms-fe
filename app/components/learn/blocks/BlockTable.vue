@@ -18,7 +18,7 @@ defineProps<{ block: TableBlock }>()
           <th
             v-for="(cell, ci) in row"
             :key="`h-${ri}-${ci}`"
-            class="px-4 py-2 text-start font-medium text-default"
+            class="vl-rich-text px-4 py-2 text-start font-medium text-default"
             v-html="cell"
           />
         </tr>
@@ -32,7 +32,7 @@ defineProps<{ block: TableBlock }>()
           <td
             v-for="(cell, ci) in row"
             :key="`b-${ri}-${ci}`"
-            class="px-4 py-2 align-top"
+            class="vl-rich-text px-4 py-2 align-top"
             v-html="cell"
           />
         </tr>
@@ -46,7 +46,7 @@ defineProps<{ block: TableBlock }>()
           <td
             v-for="(cell, ci) in row"
             :key="`f-${ri}-${ci}`"
-            class="px-4 py-2 text-muted"
+            class="vl-rich-text px-4 py-2 text-muted"
             v-html="cell"
           />
         </tr>

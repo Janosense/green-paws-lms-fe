@@ -41,7 +41,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="pipFrameRef"
-    class="not-prose mb-6 aspect-video"
+    class="mb-6 aspect-video"
   >
     <div
       :class="[
