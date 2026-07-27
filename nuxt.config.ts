@@ -80,9 +80,11 @@ export default defineNuxtConfig({
     }
   },
 
-  // Public catalog: prerendered at build time so Google / OpenGraph crawlers
-  // see real HTML. SWR (the previous Phase 3.4 setting) requires a Nitro
-  // server, which a static host doesn't provide.
+  // Public catalog (/courses/*, /webinars/*): client-only. Previously
+  // prerendered (and before that SWR-cached); switched to `ssr: false` to
+  // sidestep SSR limitations around the pages' client-side interactions.
+  // Trade-off: crawlers / OpenGraph bots get an SPA shell for catalog
+  // detail pages until prerender is re-enabled.
   //
   // Authed surfaces are marked `ssr: false` so Nuxt ships a SPA shell and
   // never tries to render them server-side. The vl-jwt-auth refresh cookie

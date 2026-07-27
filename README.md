@@ -75,7 +75,7 @@ Then open <http://localhost:3000>.
 - `/sitemap.xml` — homepage + catalog roots + every course/webinar slug. Pages courses and webinars in batches of 50, capped at 20 pages per type. 5-minute s-maxage.
 - `/robots.txt` — disallows the auth pages, `/account*`, `/dashboard*`, `/learn*`, `/search`, and any URL with `?return_to=`. Points to `/sitemap.xml`.
 
-`routeRules` in `nuxt.config.ts` apply 5-minute SWR to `/courses/*` and `/webinars/*` (single-segment detail routes only), since catalog content is editorial and changes infrequently. The patterns deliberately exclude the bare `/courses` and `/webinars` index payloads — they collide with the per-slug payload directory in Nitro's filesystem cache (`ENOTDIR`).
+`routeRules` in `nuxt.config.ts` render `/courses/*` and `/webinars/*` (single-segment detail routes only) client-only (`ssr: false`) — they were prerendered at build time in earlier phases, and briefly SWR-cached, before being switched to sidestep SSR limitations around their client-side interactions. Consequence: crawlers and link-preview bots currently receive an SPA shell for catalog detail pages, not populated HTML.
 
 Components are auto-imported with `pathPrefix: false` (`nuxt.config.ts → components`), so files keep their bare filenames regardless of folder (`<CourseCard>` from `components/catalog/CourseCard.vue`, `<EnrolledCourseCard>` from `components/dashboard/EnrolledCourseCard.vue`, etc.). New component filenames must therefore stay globally unique across `app/components/`.
 
