@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useNow } from '@vueuse/core'
 import type { SessionDetailResponse } from '#shared/types/learn'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 import { formatScheduledDate } from '~/utils/formatScheduledDate'
 
 interface Props {
@@ -56,37 +57,27 @@ const joinOpensInline = computed(() => {
   if (isPast.value || joinWindowOpen.value || isCancelled.value) return ''
   const opensAt = computedBlock.value.join_opens_at
   if (!opensAt) return ''
-  const date = new Date(opensAt)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    const formatted = new Intl.DateTimeFormat('uk-UA', {
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).format(date)
-    return t('learn.session.join_window_will_open_at', { date: formatted })
-  } catch {
-    return ''
-  }
+  const formatted = formatInSourceOffset(opensAt, 'uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+  if (formatted === null) return ''
+  return t('learn.session.join_window_will_open_at', { date: formatted })
 })
 
 const recordingExpiredLine = computed(() => {
   const until = session.value.recording_available_until
   if (!until) return ''
-  const date = new Date(until)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    const formatted = new Intl.DateTimeFormat('uk-UA', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(date)
-    return t('learn.session.recording_window_expired', { date: formatted })
-  } catch {
-    return ''
-  }
+  const formatted = formatInSourceOffset(until, 'uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+  if (formatted === null) return ''
+  return t('learn.session.recording_window_expired', { date: formatted })
 })
 </script>
 

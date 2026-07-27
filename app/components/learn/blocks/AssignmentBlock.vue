@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ApiError } from '#shared/types/api'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 
 /**
  * Phase 9.7 — student-facing assignment submission block.
@@ -185,11 +186,11 @@ function pickFile(event: Event): void {
 
 function formatDate(value: string | null): string {
   if (!value) return ''
-  try {
-    return new Date(value).toLocaleDateString('uk-UA', { year: 'numeric', month: 'long', day: 'numeric' })
-  } catch {
-    return value
-  }
+  return formatInSourceOffset(value, 'uk-UA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) ?? value
 }
 
 onMounted(() => {

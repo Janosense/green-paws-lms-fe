@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { WebinarDetailResponse } from '#shared/types/catalog'
 import { resolveWebinarError } from '~/utils/resolveWebinarError'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 import { formatScheduledDate } from '~/utils/formatScheduledDate'
 
 definePageMeta({
@@ -144,35 +145,25 @@ async function onReRegister(): Promise<void> {
 const recordingUntilLine = computed(() => {
   const until = registration.value?.webinar.recording_available_until
   if (!until) return ''
-  const date = new Date(until)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    const formatted = new Intl.DateTimeFormat('uk-UA', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(date)
-    return t('webinar.recording_until', { date: formatted })
-  } catch {
-    return ''
-  }
+  const formatted = formatInSourceOffset(until, 'uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+  if (formatted === null) return ''
+  return t('webinar.recording_until', { date: formatted })
 })
 
 const cancelledAtLine = computed(() => {
   const at = registration.value?.cancelled_at
   if (!at) return ''
-  const date = new Date(at)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    const formatted = new Intl.DateTimeFormat('uk-UA', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(date)
-    return t('webinar.cancelled_at_line', { date: formatted })
-  } catch {
-    return ''
-  }
+  const formatted = formatInSourceOffset(at, 'uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+  if (formatted === null) return ''
+  return t('webinar.cancelled_at_line', { date: formatted })
 })
 </script>
 

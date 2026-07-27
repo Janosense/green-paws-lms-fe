@@ -7,6 +7,7 @@
 import { useNow } from '@vueuse/core'
 import type { WebinarDetail, WebinarStatus } from '#shared/types/catalog'
 import { useWebinarStateMachine, type WebinarCtaState } from '~/composables/useWebinarStateMachine'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 import { formatPrice } from '~/utils/formatPrice'
 import { formatRelativeDate } from '~/utils/formatRelativeDate'
 import { formatScheduledDate } from '~/utils/formatScheduledDate'
@@ -80,19 +81,13 @@ const state = computed<WebinarCtaState>(() => useWebinarStateMachine({
 
 const opensAtFormatted = computed(() => {
   if (state.value.kind !== 'registration_not_open_yet') return ''
-  const date = new Date(state.value.opensAt)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    return new Intl.DateTimeFormat('uk-UA', {
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).format(date)
-  } catch {
-    return state.value.opensAt
-  }
+  return formatInSourceOffset(state.value.opensAt, 'uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }) ?? ''
 })
 
 interface CtaUi {

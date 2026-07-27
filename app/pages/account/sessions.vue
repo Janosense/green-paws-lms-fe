@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Session } from '#shared/types/auth'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 import { isApiError, resolveAuthError } from '~/utils/resolveAuthError'
 
 definePageMeta({
@@ -44,21 +45,13 @@ onMounted(() => {
 function formatDate(value: string): string {
   // Backend returns ISO-like timestamps. `useTimeAgo` would be nicer but
   // requires reactivity per row; for a stub UI a single absolute date is fine.
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date)
-  } catch {
-    return date.toISOString()
-  }
+  return formatInSourceOffset(value, locale.value, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) ?? value
 }
 
 async function revoke(id: number) {

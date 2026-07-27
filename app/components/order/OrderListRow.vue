@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Order } from '#shared/types/order'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 import { formatPrice } from '~/utils/formatPrice'
 
 interface Props {
@@ -19,19 +20,13 @@ const priceLabel = computed(() => {
   return formatPrice(major, props.order.amount.currency)
 })
 
-const createdLabel = computed(() => {
-  const date = new Date(props.order.created_at)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    return new Intl.DateTimeFormat('uk-UA', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(date)
-  } catch {
-    return props.order.created_at
-  }
-})
+const createdLabel = computed(() =>
+  formatInSourceOffset(props.order.created_at, 'uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }) ?? ''
+)
 
 const entityTypeLabel = computed(() => t(`order.entity_type.${props.order.entity_type}`))
 </script>

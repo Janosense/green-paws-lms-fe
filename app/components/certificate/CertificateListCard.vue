@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CertificateListItem } from '#shared/types/certificate'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 
 /**
  * Phase 6.4 — dashboard list card. Mirrors the visual rhythm of
@@ -20,19 +21,13 @@ const detailPath = computed(() => `/dashboard/certificates/${item.uuid}`)
 
 const isRevoked = computed(() => item.status === 'revoked')
 
-const issuedAtLabel = computed(() => {
-  const date = new Date(item.issued_at)
-  if (Number.isNaN(date.getTime())) return ''
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date)
-  } catch {
-    return date.toISOString().slice(0, 10)
-  }
-})
+const issuedAtLabel = computed(() =>
+  formatInSourceOffset(item.issued_at, locale.value, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) ?? ''
+)
 </script>
 
 <template>

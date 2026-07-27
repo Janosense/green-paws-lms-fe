@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CertificatePublicResponse } from '#shared/types/certificate'
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
 
 definePageMeta({
   layout: 'default',
@@ -44,17 +45,11 @@ const hasOtherError = computed(() => Boolean(error.value) && !isNotFound.value)
 const isRevoked = computed(() => certificate.value?.status === 'revoked')
 
 function formatDate(iso: string): string {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return iso
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date)
-  } catch {
-    return iso
-  }
+  return formatInSourceOffset(iso, locale.value, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) ?? iso
 }
 </script>
 

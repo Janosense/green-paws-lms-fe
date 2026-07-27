@@ -9,6 +9,8 @@
  *
  * @author Tymofii Synianskyi
  */
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
+
 interface Props {
   revokedAt: string
   variant?: 'inline' | 'hero'
@@ -18,19 +20,13 @@ const { revokedAt, variant = 'inline' } = defineProps<Props>()
 
 const { t, locale } = useI18n()
 
-const revokedAtLabel = computed(() => {
-  const date = new Date(revokedAt)
-  if (Number.isNaN(date.getTime())) return revokedAt
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date)
-  } catch {
-    return revokedAt
-  }
-})
+const revokedAtLabel = computed(() =>
+  formatInSourceOffset(revokedAt, locale.value, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) ?? revokedAt
+)
 
 const description = computed(() =>
   t('certificate.revoked.body', { date: revokedAtLabel.value })

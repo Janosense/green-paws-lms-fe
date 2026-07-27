@@ -10,6 +10,8 @@
  *
  * @author Tymofii Synianskyi
  */
+import { formatInSourceOffset } from '~/utils/formatInSourceOffset'
+
 interface Props {
   courseTitle: string
   issuerName: string
@@ -23,19 +25,13 @@ const props = defineProps<Props>()
 
 const { t, locale } = useI18n()
 
-const issuedAtLabel = computed(() => {
-  const date = new Date(props.issuedAt)
-  if (Number.isNaN(date.getTime())) return props.issuedAt
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date)
-  } catch {
-    return props.issuedAt
-  }
-})
+const issuedAtLabel = computed(() =>
+  formatInSourceOffset(props.issuedAt, locale.value, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) ?? props.issuedAt
+)
 
 const instructorLabel = computed(() =>
   props.instructorNames.length > 1
