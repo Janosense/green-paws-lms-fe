@@ -604,7 +604,7 @@
   },
   "quiz": {
     "player": {
-      "seoTitle": "Quiz: {slug}",
+      "seoTitle": "Тест: {slug}",
       "questionCount": "Запитання {current} з {total}",
       "questionNumber": "Запитання {n}",
       "questionsNav": "Навігація по запитаннях",
@@ -617,16 +617,16 @@
       "saving": "Збереження…",
       "previous": "Попереднє",
       "next": "Наступне",
-      "finish": "Завершити quiz",
-      "confirmFinishTitle": "Завершити quiz?",
-      "confirmFinishBody": "Ви відповіли на {answered} з {total} запитань. Завершити quiz?",
+      "finish": "Завершити тест",
+      "confirmFinishTitle": "Завершити тест?",
+      "confirmFinishBody": "Ви відповіли на {answered} з {total} запитань. Завершити тест?",
       "confirmFinishConfirm": "Завершити",
       "confirmFinishCancel": "Продовжити",
       "attemptsRemaining": "Спроб залишилось: {count}"
     },
     "results": {
-      "passed": "Quiz пройдено",
-      "failed": "Quiz не пройдено",
+      "passed": "Тест пройдено",
+      "failed": "Тест не пройдено",
       "expired": "Час вийшов",
       "scoreFormat": "{score} з {max}",
       "passingThreshold": "Прохідний бал: {threshold}%",
@@ -651,17 +651,17 @@
       }
     },
     "errors": {
-      "title": "Помилка quiz",
+      "title": "Помилка тесту",
       "backToDashboard": "Назад до панелі",
       "unauthenticated": "Сесія недійсна. Увійдіть знову.",
       "forbidden": "Доступ заборонено.",
-      "notFound": "Quiz не знайдено.",
-      "misconfigured": "Quiz не прив'язаний до жодного курсу. Зверніться до інструктора.",
+      "notFound": "Тест не знайдено.",
+      "misconfigured": "Тест не прив'язаний до жодного курсу. Зверніться до інструктора.",
       "notEnrolled": "Ви не зареєстровані на курс.",
       "attemptsExhausted": "Кількість спроб вичерпано.",
       "attemptNotFound": "Спробу не знайдено.",
-      "expired": "Час quiz вийшов. Результат збережено.",
-      "alreadyFinalized": "Quiz вже завершено.",
+      "expired": "Час тесту вийшов. Результат збережено.",
+      "alreadyFinalized": "Тест вже завершено.",
       "invalidQuestion": "Невідоме запитання. Оновіть сторінку.",
       "invalidAnswer": "Відповідь у неправильному форматі.",
       "internal": "Сталася помилка. Спробуйте ще раз."
