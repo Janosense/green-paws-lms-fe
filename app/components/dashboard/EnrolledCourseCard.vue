@@ -27,6 +27,32 @@ const ctaLabel = computed(() =>
     : t('enrollment.actions.continue')
 )
 
+interface StatRow {
+  key: string
+  icon: string
+  label: string
+  done: number
+  total: number
+}
+
+// Types with a zero total are hidden entirely — no "0/0" rows. The
+// optional chaining is cheap defence at the trust boundary, mirroring the
+// store's Array.isArray guard on the list payload.
+const statRows = computed<StatRow[]>(() => {
+  const stats = enrollment.stats
+  if (!stats) return []
+  return [
+    { key: 'modules', icon: 'i-lucide-layers', label: t('enrollment.stats.modules'), done: stats.modules.completed, total: stats.modules.total },
+    { key: 'lessons', icon: 'i-lucide-book-open', label: t('enrollment.stats.lessons'), done: stats.lessons.completed, total: stats.lessons.total },
+    { key: 'topics', icon: 'i-lucide-file-text', label: t('enrollment.stats.topics'), done: stats.topics.completed, total: stats.topics.total },
+    { key: 'quizzes', icon: 'i-lucide-clipboard-list', label: t('enrollment.stats.quizzes'), done: stats.quizzes.passed, total: stats.quizzes.total }
+  ].filter(row => row.total > 0)
+})
+
+const showFinalExamBadge = computed(() =>
+  Boolean(enrollment.stats?.quizzes.has_final_exam && enrollment.stats.quizzes.total > 0)
+)
+
 const ctaLoading = ref(false)
 
 const resetOpen = ref(false)
@@ -87,15 +113,27 @@ async function onConfirmReset(): Promise<void> {
         :fallback-initial="titleInitial"
       />
 
-      <UBadge
-        :color="isCompleted ? 'success' : 'primary'"
-        variant="subtle"
-        size="sm"
-      >
-        {{ isCompleted
-          ? t('enrollment.status.completed')
-          : t('enrollment.status.active') }}
-      </UBadge>
+      <div class="flex flex-wrap items-center gap-2">
+        <UBadge
+          :color="isCompleted ? 'success' : 'primary'"
+          variant="subtle"
+          size="sm"
+        >
+          {{ isCompleted
+            ? t('enrollment.status.completed')
+            : t('enrollment.status.active') }}
+        </UBadge>
+
+        <UBadge
+          v-if="showFinalExamBadge"
+          color="neutral"
+          variant="subtle"
+          size="sm"
+          icon="i-lucide-graduation-cap"
+        >
+          {{ t('enrollment.stats.final_exam') }}
+        </UBadge>
+      </div>
 
       <h3 class="text-base font-medium leading-snug line-clamp-2">
         <NuxtLink
@@ -105,6 +143,28 @@ async function onConfirmReset(): Promise<void> {
           {{ enrollment.course.title }}
         </NuxtLink>
       </h3>
+
+      <ul
+        v-if="statRows.length > 0"
+        class="space-y-1.5"
+      >
+        <li
+          v-for="row in statRows"
+          :key="row.key"
+          class="flex items-center justify-between gap-4"
+        >
+          <span class="flex items-center gap-2 min-w-0">
+            <UIcon
+              :name="row.icon"
+              class="size-4 text-muted shrink-0"
+            />
+            <span class="text-sm truncate">{{ row.label }}</span>
+          </span>
+          <span class="text-xs text-muted shrink-0 tabular-nums">
+            {{ row.done }}/{{ row.total }}
+          </span>
+        </li>
+      </ul>
 
       <UProgress
         v-if="!isCompleted"

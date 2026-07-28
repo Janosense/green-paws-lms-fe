@@ -17,6 +17,30 @@ export interface EnrollmentCourseSummary {
   cover: CardCover | null
 }
 
+export interface EnrollmentStatPair {
+  total: number
+  completed: number
+}
+
+export interface EnrollmentQuizStats {
+  total: number
+  passed: number
+  has_final_exam: boolean
+}
+
+/**
+ * Per-course curriculum tallies computed server-side by
+ * `EnrollmentStatsService`. Totals follow curriculum-stop semantics (a
+ * lesson with topics counts as a lesson AND its topics), so they don't
+ * arithmetically reconcile with `progress_pct` — that's expected.
+ */
+export interface EnrollmentStats {
+  modules: EnrollmentStatPair
+  lessons: EnrollmentStatPair
+  topics: EnrollmentStatPair
+  quizzes: EnrollmentQuizStats
+}
+
 export interface EnrollmentRecord {
   id: number
   course: EnrollmentCourseSummary
@@ -26,6 +50,7 @@ export interface EnrollmentRecord {
   enrolled_at: string
   completed_at: string | null
   expires_at: string | null
+  stats: EnrollmentStats
 }
 
 export interface EnrollmentsListData {

@@ -132,6 +132,13 @@
       "active": "Активний",
       "completed": "Завершено"
     },
+    "stats": {
+      "modules": "Модулі",
+      "lessons": "Уроки",
+      "topics": "Теми",
+      "quizzes": "Тести",
+      "final_exam": "Підсумковий тест"
+    },
     "actions": {
       "continue": "Продовжити",
       "review": "Переглянути",
