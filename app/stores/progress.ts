@@ -149,6 +149,33 @@ export const useProgressStore = defineStore('progress', () => {
   }
 
   /**
+   * Drop one course's cached curriculum without refetching. Used after a
+   * progress reset: the cache is stale (locks re-engaged, statuses back to
+   * not_started), but the student may never open the course next, so an
+   * eager refetch would be a wasted authed request — `ensureCourseLoaded`
+   * refetches lazily on the next visit.
+   */
+  function removeCourse(slug: string): void {
+    curricula.value = filteredOut(curricula.value, slug)
+    status.value = filteredOut(status.value, slug)
+    error.value = filteredOut(error.value, slug)
+    inflight.delete(slug)
+  }
+
+  function filteredOut<T>(record: Record<string, T>, key: string): Record<string, T> {
+    if (!(key in record)) {
+      return record
+    }
+    const next: Record<string, T> = {}
+    for (const k in record) {
+      if (k !== key) {
+        next[k] = record[k] as T
+      }
+    }
+    return next
+  }
+
+  /**
    * Force a re-fetch, bypassing the cache check. Used after view_start /
    * mark-complete events to reconcile rail icons and progress_pct against
    * the authoritative server state.
@@ -179,6 +206,7 @@ export const useProgressStore = defineStore('progress', () => {
     // actions
     ensureCourseLoaded,
     refreshCourse,
+    removeCourse,
     applyEntityStatus,
     setCurrentCourse,
     clear

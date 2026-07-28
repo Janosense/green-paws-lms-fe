@@ -14,6 +14,8 @@ const KNOWN_CODES: Readonly<Record<string, string>> = {
   enrollment_not_open: 'enrollment.errors.not_open',
   enrollment_full: 'enrollment.errors.full',
   course_not_found: 'enrollment.errors.not_found',
+  enrollment_not_found: 'enrollment.errors.enrollment_not_found',
+  progress_reset_failed: 'enrollment.errors.progress_reset_failed',
   rest_not_logged_in: 'enrollment.errors.unauthorized',
   rest_forbidden: 'enrollment.errors.forbidden'
 }

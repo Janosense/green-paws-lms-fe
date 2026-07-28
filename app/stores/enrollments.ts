@@ -101,13 +101,35 @@ export const useEnrollmentsStore = defineStore('enrollments', () => {
       { course_id: courseId }
     )
     const record = response.data
+    upsertRecord(record)
+    return record
+  }
+
+  /**
+   * Reset the caller's progress in a course ("fresh start with preserved
+   * history" — the backend keeps quiz-attempt history and certificates).
+   * Resolves with the refreshed record (status back to `active`,
+   * `progress_pct` 0); throws the normalized `ApiError` on failure so the
+   * caller can map it to a localized toast. Same mutation contract as
+   * `enroll()`: store-level `status` / `error` are untouched.
+   */
+  async function resetProgress(courseSlug: string): Promise<EnrollmentRecord> {
+    const api = useApi()
+    const response = await api.delete<EnrollmentRecordResponse>(
+      `/vl/v1/enrollments/me/${courseSlug}/progress`
+    )
+    const record = response.data
+    upsertRecord(record)
+    return record
+  }
+
+  function upsertRecord(record: EnrollmentRecord): void {
     const existingIndex = items.value.findIndex(item => item.id === record.id)
     if (existingIndex >= 0) {
       items.value.splice(existingIndex, 1, record)
     } else {
       items.value = [record, ...items.value]
     }
-    return record
   }
 
   return {
@@ -126,6 +148,7 @@ export const useEnrollmentsStore = defineStore('enrollments', () => {
     init,
     refresh,
     enroll,
+    resetProgress,
     clear
   }
 })

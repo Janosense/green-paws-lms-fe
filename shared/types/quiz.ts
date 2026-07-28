@@ -175,6 +175,13 @@ export interface QuizAttemptHistoryEntry {
   time_taken_seconds: number | null
 }
 
+/**
+ * The `attempts` rows are all-time — a progress reset never hides earlier
+ * sittings from the learner's own log. The summary fields
+ * (`attempts_remaining`, `graded_attempts`, `best_score`, `passed`,
+ * `passed_on_attempt`) count post-reset sittings only, matching what the
+ * backend gates enforce.
+ */
 export interface QuizAttemptHistoryResponse {
   quiz_id: number
   quiz_title: string
@@ -187,12 +194,12 @@ export interface QuizAttemptHistoryResponse {
   attempts_remaining: number | null
   /** Every sitting, including still-open ones. */
   total_attempts: number
-  /** Sittings in a terminal state (`submitted` + `expired`). */
+  /** Sittings in a terminal state (`submitted` + `expired`) since the last progress reset. */
   graded_attempts: number
-  /** Highest percentage across `submitted` attempts; null until the first. */
+  /** Highest percentage across `submitted` attempts since the last progress reset; null until the first. */
   best_score: number | null
   passed: boolean
-  /** `attempt_number` of the first passing sitting; null if never passed. */
+  /** All-time `attempt_number` of the first counting (post-reset) pass; null if never passed. */
   passed_on_attempt: number | null
   attempts: QuizAttemptHistoryEntry[]
 }
