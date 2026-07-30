@@ -263,11 +263,6 @@ const neighbors = computed(() =>
         </template>
       </ClientOnly>
 
-      <MarkCompleteButton
-        :completed="isCompleted"
-        @click="handleMarkComplete"
-      />
-
       <section v-if="lesson.attachments.length">
         <h2 class="text-lg mb-2">
           {{ t('learn.lesson.section.attachments') }}
@@ -278,6 +273,11 @@ const neighbors = computed(() =>
       <BlockRenderer
         :blocks="lesson.content.blocks"
         class="mt-8"
+      />
+
+      <MarkCompleteButton
+        :completed="isCompleted"
+        @click="handleMarkComplete"
       />
 
       <LearnPagination

@@ -265,14 +265,14 @@ const neighbors = computed(() =>
         </template>
       </ClientOnly>
 
-      <MarkCompleteButton
-        :completed="isCompleted"
-        @click="handleMarkComplete"
-      />
-
       <BlockRenderer
         :blocks="topic.content.blocks"
         class="mt-8"
+      />
+
+      <MarkCompleteButton
+        :completed="isCompleted"
+        @click="handleMarkComplete"
       />
 
       <LearnPagination
