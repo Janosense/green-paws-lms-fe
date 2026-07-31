@@ -169,6 +169,12 @@ const navigationLeaves = computed(() => {
 const neighbors = computed(() =>
   neighborsByLessonSlug(navigationLeaves.value, lessonSlug.value)
 )
+
+const completionHint = computed(() => {
+  const mode = curriculum.value?.course.completion_mode
+  if (!mode) return undefined
+  return t(mode === 'sequential' ? 'learn.complete.hint_sequential' : 'learn.complete.hint_free')
+})
 </script>
 
 <template>
@@ -277,6 +283,7 @@ const neighbors = computed(() =>
 
       <MarkCompleteButton
         :completed="isCompleted"
+        :hint="completionHint"
         @click="handleMarkComplete"
       />
 

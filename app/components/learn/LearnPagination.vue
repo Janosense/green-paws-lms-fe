@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LearnLeaf } from '~/composables/useLearnNavigation'
-import { isLeafLocked, leafToPath } from '~/composables/useLearnNavigation'
+import { isLeafLocked, leafLock, leafToPath } from '~/composables/useLearnNavigation'
 
 interface Props {
   prev: LearnLeaf | null
@@ -17,6 +17,9 @@ const { t } = useI18n()
 // navigate: dropping `to` rather than relying on `disabled` alone keeps
 // UButton from rendering a still-clickable anchor.
 const nextLocked = computed(() => (next ? isLeafLocked(next) : false))
+// Inline rather than a tooltip: a disabled button receives no hover
+// events, so the reason has to sit in the label itself.
+const { tooltipText: nextLockReason } = useCurriculumLock(() => (next ? leafLock(next) : null))
 // Everything before the frontier is open, so this should never fire.
 // Handled symmetrically rather than assumed.
 const prevLocked = computed(() => (prev ? isLeafLocked(prev) : false))
@@ -73,10 +76,10 @@ function leafTitle(leaf: LearnLeaf): string {
     >
       <span class="flex flex-col items-end text-end min-w-0">
         <span
-          class="text-xs"
+          class="text-xs truncate max-w-xs"
           :class="highlightNext ? 'opacity-80' : 'text-muted'"
         >
-          {{ nextLocked ? t('learn.pagination.locked') : t('learn.pagination.next') }}
+          {{ nextLocked ? (nextLockReason || t('learn.pagination.locked')) : t('learn.pagination.next') }}
         </span>
         <span class="text-sm truncate max-w-xs">{{ leafTitle(next) }}</span>
       </span>

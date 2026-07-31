@@ -502,6 +502,7 @@
       "quiz_score": "{pct}%",
       "locked_by_quiz": "Складіть тест «{quiz}», щоб відкрити",
       "locked_prerequisites": "Складіть усі тести курсу, щоб відкрити",
+      "locked_by_lesson": "Завершіть «{title}», щоб відкрити",
       "locked_generic": "Ще недоступно"
     },
     "pagination": {
@@ -530,7 +531,8 @@
         "back_to_dashboard": "На дашборд",
         "back_to_course": "До курсу",
         "description_progression_locked": "Цей урок відкриється після того, як ви успішно складете попередній тест курсу.",
-        "description_course_quizzes_incomplete": "Спочатку складіть усі тести курсу."
+        "description_course_quizzes_incomplete": "Спочатку складіть усі тести курсу.",
+        "description_previous_incomplete": "Цей урок відкриється після завершення попереднього. Позначте попередній урок завершеним, щоб продовжити."
       },
       "not_found": {
         "title": "Урок не знайдено",
@@ -553,7 +555,8 @@
         "back_to_dashboard": "На дашборд",
         "back_to_lesson": "До уроку",
         "description_progression_locked": "Ця тема відкриється після того, як ви успішно складете попередній тест курсу.",
-        "description_course_quizzes_incomplete": "Спочатку складіть усі тести курсу."
+        "description_course_quizzes_incomplete": "Спочатку складіть усі тести курсу.",
+        "description_previous_incomplete": "Ця тема відкриється після завершення попередньої. Позначте попередній матеріал завершеним, щоб продовжити."
       },
       "not_found": {
         "title": "Тему не знайдено",
@@ -589,7 +592,9 @@
     },
     "complete": {
       "cta": "Позначити як завершений",
-      "badge": "Завершено"
+      "badge": "Завершено",
+      "hint_free": "Натисніть, щоб урок зарахувався у ваш прогрес",
+      "hint_sequential": "Позначте як завершений, щоб відкрити наступний урок"
     }
   },
   "errors": {
@@ -702,7 +707,8 @@
       "invalidAnswer": "Відповідь у неправильному форматі.",
       "internal": "Сталася помилка. Спробуйте ще раз.",
       "progressionLocked": "Цей тест ще недоступний. Спочатку складіть попередній тест курсу.",
-      "courseQuizzesIncomplete": "Щоб скласти цей тест, спочатку складіть усі інші тести курсу."
+      "courseQuizzesIncomplete": "Щоб скласти цей тест, спочатку складіть усі інші тести курсу.",
+      "previousIncomplete": "Цей тест ще недоступний. Спочатку завершіть попередній урок."
     }
   },
   "certificate": {

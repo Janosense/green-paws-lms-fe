@@ -179,18 +179,26 @@ export const useProgressStore = defineStore('progress', () => {
    * Force a re-fetch, bypassing the cache check. Used after view_start /
    * mark-complete events to reconcile rail icons and progress_pct against
    * the authoritative server state.
+   *
+   * A refresh must resolve against a GET issued *after* the caller's
+   * write, so a concurrent in-flight load is chained behind, not joined:
+   * joining would hand back a pre-write snapshot, which on a sequential
+   * course leaves the next lesson padlocked until navigation. Later
+   * `ensureCourseLoaded` callers still dedupe against the chained
+   * promise.
    */
   function refreshCourse(slug: string): Promise<void> {
     currentCourseSlug.value = slug
 
-    const existing = inflight.get(slug)
-    if (existing) {
-      return existing
-    }
-
-    const promise = fetchCourse(slug).finally(() => {
-      inflight.delete(slug)
-    })
+    const existing = inflight.get(slug) ?? Promise.resolve()
+    const promise = existing
+      .catch(() => {})
+      .then(() => fetchCourse(slug))
+      .finally(() => {
+        if (inflight.get(slug) === promise) {
+          inflight.delete(slug)
+        }
+      })
     inflight.set(slug, promise)
     return promise
   }

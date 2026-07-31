@@ -158,12 +158,22 @@ export interface EnrollmentBlock {
   completed_at: string | null
 }
 
+/**
+ * How lessons unlock in this course. `free` — any order (the default);
+ * `sequential` — each lesson/topic opens only after the previous one is
+ * marked complete. Normalized server-side: cohort courses always report
+ * `free`, so the "sequential is self-paced-only" rule never needs a
+ * client copy.
+ */
+export type CourseCompletionMode = 'free' | 'sequential'
+
 export interface CurriculumCourse {
   id: number
   slug: string
   title: string
   duration_seconds: number
   enrollment: EnrollmentBlock | null
+  completion_mode: CourseCompletionMode
 }
 
 /**
@@ -181,10 +191,20 @@ export interface CurriculumCourse {
  * - `course_quizzes_incomplete` — this quiz requires every other non-final
  *   quiz in the course to be passed first. `remaining_quiz_count` says how
  *   many are outstanding; there is no single quiz to name.
+ * - `previous_incomplete` — the course is sequential and an earlier lesson
+ *   or topic has not been marked complete. `blocking_entity` names it.
  */
-export type CurriculumLockReason = 'progression_locked' | 'course_quizzes_incomplete'
+export type CurriculumLockReason
+  = 'progression_locked' | 'course_quizzes_incomplete' | 'previous_incomplete'
 
 export interface CurriculumBlockingQuiz {
+  id: number
+  slug: string
+  title: string
+}
+
+export interface CurriculumBlockingEntity {
+  kind: 'lesson' | 'topic'
   id: number
   slug: string
   title: string
@@ -194,6 +214,7 @@ export interface CurriculumNodeLock {
   reason: CurriculumLockReason
   blocking_quiz: CurriculumBlockingQuiz | null
   remaining_quiz_count: number
+  blocking_entity: CurriculumBlockingEntity | null
 }
 
 export interface CurriculumTopicNode {

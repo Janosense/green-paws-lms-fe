@@ -22,11 +22,15 @@ const NOT_FOUND_CODES: ReadonlySet<string> = new Set([
  * not exist.
  */
 const ERROR_CODES: Readonly<
-  Record<string, 'not_enrolled' | 'unauthorized' | 'progression_locked' | 'course_quizzes_incomplete'>
+  Record<
+    string,
+    'not_enrolled' | 'unauthorized' | 'progression_locked' | 'course_quizzes_incomplete' | 'previous_incomplete'
+  >
 > = {
   not_enrolled: 'not_enrolled',
   progression_locked: 'progression_locked',
   course_quizzes_incomplete: 'course_quizzes_incomplete',
+  previous_incomplete: 'previous_incomplete',
   rest_not_logged_in: 'unauthorized',
   rest_forbidden: 'unauthorized',
   unauthorized: 'unauthorized'

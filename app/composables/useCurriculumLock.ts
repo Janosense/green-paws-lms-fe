@@ -24,6 +24,11 @@ export function useCurriculumLock(lock: MaybeRefOrGetter<CurriculumNodeLock | nu
     if (value.reason === 'course_quizzes_incomplete') {
       return t('learn.rail.locked_prerequisites', { count: value.remaining_quiz_count })
     }
+    if (value.reason === 'previous_incomplete') {
+      return value.blocking_entity
+        ? t('learn.rail.locked_by_lesson', { title: value.blocking_entity.title })
+        : t('learn.rail.locked_generic')
+    }
     // `blocking_quiz` is always present on a progression lock, but fall back
     // rather than render an empty quoted title if the payload ever changes.
     return value.blocking_quiz
