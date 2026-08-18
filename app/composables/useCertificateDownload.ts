@@ -11,6 +11,11 @@ import { resolveCertificateError } from '~/utils/resolveCertificateError'
  * interceptor still applies), wrap it in an object URL, then click a
  * temporary anchor to trigger the browser save dialog.
  *
+ * The request path is built from `certificate.uuid` (namespace-relative,
+ * like every other call site) rather than the server-shaped
+ * `download_url` field, so a prefixed value from an older backend can
+ * never double up against the `/wp-json` API base.
+ *
  * `URL.revokeObjectURL` is delayed by a tick — Safari needs the URL to
  * stay live across the click before it can be released.
  *
@@ -34,7 +39,7 @@ export function useCertificateDownload() {
     error.value = null
 
     try {
-      const blob = await useApi().get<Blob>(certificate.download_url, {
+      const blob = await useApi().get<Blob>(`/vl/v1/certificates/${certificate.uuid}/download`, {
         responseType: 'blob'
       })
 
