@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.102",
-    "@iconify-json/simple-icons": "^1.2.78",
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.6.1",
     "@nuxtjs/i18n": "^10.3.0",
@@ -30,7 +29,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@iconify-json/tabler": "^1.2.33",
     "@nuxt/eslint": "^1.15.2",
     "@nuxt/fonts": "^0.14.0",
     "@nuxtjs/color-mode": "^4.0.0",
