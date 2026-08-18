@@ -2,9 +2,12 @@
  * Boot-time enrollment hydration + auth-state watcher.
  *
  * Depends on `vl-auth` so the auth store is hydrated before we look at
- * `isAuthenticated`. Runs on both server and client; the SSR pre-fetch
- * means an authed page load has the dashboard's data ready by the time
- * the page renders, which avoids a no-data flash on hydrate.
+ * `isAuthenticated` (which is only ever true on the client — `vl-auth`
+ * returns early on SSR). The prefetch is deliberately fire-and-forget:
+ * blocking app mount on it would put a WP round-trip on every authed
+ * first load's critical path. Pages that need the data `await init()`
+ * themselves and dedupe against this call via the store's single-flight
+ * `init()` promise.
  *
  * The watcher runs unconditionally so a logout/login cycle in the same
  * session re-hydrates without a hard reload.
@@ -12,12 +15,12 @@
 export default defineNuxtPlugin({
   name: 'enrollments',
   dependsOn: ['vl-auth'],
-  async setup() {
+  setup() {
     const authStore = useAuthStore()
     const enrollmentsStore = useEnrollmentsStore()
 
     if (authStore.isAuthenticated) {
-      await enrollmentsStore.init()
+      void enrollmentsStore.init()
     }
 
     watch(

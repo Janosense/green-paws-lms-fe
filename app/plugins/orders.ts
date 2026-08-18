@@ -1,22 +1,22 @@
 /**
  * Boot-time orders hydration + auth-state watcher.
  *
- * Mirrors `app/plugins/certificates.ts` exactly. Depends on `vl-auth` so the
- * auth store is hydrated before we look at `isAuthenticated`. The boot
- * prefetch keeps the dashboard `/dashboard/orders` list ready for instant
- * render once the user clicks the sidebar entry.
+ * Mirrors `app/plugins/certificates.ts` exactly: fire-and-forget prefetch
+ * (kept off the app-mount critical path) that warms `/dashboard/orders`,
+ * single-flight dedupe with any page-level `await init()`, and an
+ * unconditional auth watcher.
  *
  * @author Tymofii Synianskyi
  */
 export default defineNuxtPlugin({
   name: 'vl-orders',
   dependsOn: ['vl-auth'],
-  async setup() {
+  setup() {
     const authStore = useAuthStore()
     const ordersStore = useOrdersStore()
 
     if (authStore.isAuthenticated) {
-      await ordersStore.init()
+      void ordersStore.init()
     }
 
     watch(

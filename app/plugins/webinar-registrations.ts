@@ -1,19 +1,19 @@
 /**
  * Boot-time webinar-registration hydration + auth-state watcher.
  *
- * Mirrors `app/plugins/enrollments.ts`. SSR-friendly (the watcher attaches
- * regardless of side); the SSR pre-fetch keeps the dashboard's data ready
- * by hydration so the list does not flash empty on cold loads.
+ * Mirrors `app/plugins/enrollments.ts`: fire-and-forget prefetch (kept off
+ * the app-mount critical path), single-flight dedupe with any page-level
+ * `await init()`, and an unconditional auth watcher.
  */
 export default defineNuxtPlugin({
   name: 'vl-webinar-registrations',
   dependsOn: ['vl-auth'],
-  async setup() {
+  setup() {
     const authStore = useAuthStore()
     const store = useWebinarRegistrationsStore()
 
     if (authStore.isAuthenticated) {
-      await store.init()
+      void store.init()
     }
 
     watch(

@@ -13,13 +13,16 @@
  * Flow (client only):
  *   1. status -> 'loading'
  *   2. POST /vl-auth/v1/token/refresh — succeeds when the refresh cookie is
- *      live; populates the access token + user (the response embeds `user`).
- *   3. GET /vl-auth/v1/me — refreshes the user payload and pulls in the
- *      `capabilities` array (only present on /me, not on /token /refresh).
- *   4. status -> 'authenticated' or 'unauthenticated'.
+ *      live; populates the access token + user (the response embeds `user`,
+ *      roles included) and flips status to 'authenticated'.
+ *   3. GET /vl-auth/v1/me fires fire-and-forget — it only re-pulls the user
+ *      payload plus the `capabilities` array (absent from /token/refresh and
+ *      currently consumed by nothing), so it stays off the boot critical
+ *      path. Its failure is ignored: refresh() already delivered the
+ *      authoritative auth state.
  *
- * Any unexpected error (network, 5xx, malformed response) is treated as
- * "not signed in" rather than crashing the app.
+ * Any unexpected refresh error (network, 5xx, malformed response) is treated
+ * as "not signed in" rather than crashing the app.
  */
 export default defineNuxtPlugin({
   name: 'vl-auth',
@@ -39,11 +42,10 @@ export default defineNuxtPlugin({
 
     try {
       await authStore.refresh()
-      await authStore.fetchMe()
+      void authStore.fetchMe().catch(() => {})
     } catch {
       // refresh() already calls clearAuthState() on auth failure; calling
-      // again is idempotent and covers any other failure path (e.g. fetchMe
-      // 5xx after a successful refresh).
+      // again is idempotent and covers any other failure path.
       authStore.clearAuthState()
     }
   }
