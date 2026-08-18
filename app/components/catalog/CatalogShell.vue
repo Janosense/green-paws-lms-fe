@@ -36,10 +36,46 @@ type ListResponse = CourseListResponse | WebinarListResponse
 
 const path = computed(() => `/vl/v1/catalog/${props.type}`)
 
-const { data, status, error, refresh } = await useApiFetch<ListResponse>(path, {
-  query: backendQuery,
-  watch: [backendQuery]
-})
+// Taxonomy fetches — see below; declared here so the list + all four
+// taxonomy requests start together and resolve in parallel instead of
+// stair-stepping five round-trips.
+const taxonomyPostType = computed(() =>
+  props.type === 'webinars' ? 'vl_webinar' : 'vl_course'
+)
+
+const taxonomyQuery = computed(() => ({
+  post_type: taxonomyPostType.value,
+  in_use: 1
+}))
+
+const [
+  { data, status, error, refresh },
+  { data: categoryData },
+  { data: specialtyData },
+  { data: difficultyData },
+  { data: tagData }
+] = await Promise.all([
+  useApiFetch<ListResponse>(path, {
+    query: backendQuery,
+    watch: [backendQuery]
+  }),
+  useApiFetch<TaxonomyResponse>(
+    '/vl/v1/taxonomies/vl_category',
+    { query: taxonomyQuery, watch: [taxonomyQuery] }
+  ),
+  useApiFetch<TaxonomyResponse>(
+    '/vl/v1/taxonomies/vl_specialty',
+    { query: taxonomyQuery, watch: [taxonomyQuery] }
+  ),
+  useApiFetch<TaxonomyResponse>(
+    '/vl/v1/taxonomies/vl_difficulty',
+    { query: taxonomyQuery, watch: [taxonomyQuery] }
+  ),
+  useApiFetch<TaxonomyResponse>(
+    '/vl/v1/taxonomies/vl_tag',
+    { query: taxonomyQuery, watch: [taxonomyQuery] }
+  )
+])
 
 const list = computed<CatalogListData<CourseCardItem | WebinarCardItem> | null>(() => {
   const envelope = data.value
@@ -59,33 +95,6 @@ const pagination = computed(() => list.value?.pagination ?? {
 
 const isFirstLoad = computed(() => status.value === 'pending' && list.value === null)
 const isRefetching = computed(() => status.value === 'pending' && list.value !== null)
-
-// Taxonomy fetches — fired once on mount, in parallel.
-const taxonomyPostType = computed(() =>
-  props.type === 'webinars' ? 'vl_webinar' : 'vl_course'
-)
-
-const taxonomyQuery = computed(() => ({
-  post_type: taxonomyPostType.value,
-  in_use: 1
-}))
-
-const { data: categoryData } = await useApiFetch<TaxonomyResponse>(
-  '/vl/v1/taxonomies/vl_category',
-  { query: taxonomyQuery, watch: [taxonomyQuery] }
-)
-const { data: specialtyData } = await useApiFetch<TaxonomyResponse>(
-  '/vl/v1/taxonomies/vl_specialty',
-  { query: taxonomyQuery, watch: [taxonomyQuery] }
-)
-const { data: difficultyData } = await useApiFetch<TaxonomyResponse>(
-  '/vl/v1/taxonomies/vl_difficulty',
-  { query: taxonomyQuery, watch: [taxonomyQuery] }
-)
-const { data: tagData } = await useApiFetch<TaxonomyResponse>(
-  '/vl/v1/taxonomies/vl_tag',
-  { query: taxonomyQuery, watch: [taxonomyQuery] }
-)
 
 function pickTerms(envelope: TaxonomyResponse | null | undefined): TaxonomyTerm[] {
   if (!envelope || !envelope.success) {
