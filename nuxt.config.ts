@@ -32,6 +32,54 @@ export default defineNuxtConfig({
 
   ssr: true,
 
+  // Dev-server module-count fix. Without this a cold `nuxt dev` load serves
+  // ~1000 individual ESM requests: @nuxt/ui pushes `reka-ui` into
+  // `build.transpile`, the Vite builder maps transpile entries into the
+  // client dev `optimizeDeps.exclude`, and Vite then serves all ~540 reka-ui
+  // modules unbundled. `include` alone cannot fix it — Nuxt drops include
+  // entries that collide with exclude — hence the `vite:extendConfig` hook
+  // below, which strips the exclude for the client environment only.
+  // `optimizeDeps` is dev-only in Vite; production builds are unaffected.
+  vite: {
+    optimizeDeps: {
+      // Deps imported lazily by @nuxt/ui runtime components; pre-bundle them
+      // so dev doesn't hit "new dependencies optimized → reloading" churn.
+      include: [
+        '@iconify/vue',
+        'tailwind-variants',
+        '@vueuse/integrations/useFuse',
+        '@tanstack/vue-virtual',
+        '@vueuse/core',
+        'zod'
+      ]
+    },
+    server: {
+      // Paths are relative to the Vite root, which Nuxt sets to srcDir (app/).
+      warmup: {
+        clientFiles: [
+          './app.vue',
+          './layouts/default.vue',
+          './pages/index.vue',
+          './pages/courses/index.vue',
+          './pages/courses/[slug].vue'
+        ]
+      }
+    }
+  },
+
+  hooks: {
+    'vite:extendConfig'(config, { isClient }) {
+      // The object always exists here: the `vite.optimizeDeps` block above is
+      // merged into `config` before this hook runs.
+      const { optimizeDeps } = config
+      if (!isClient || !optimizeDeps) {
+        return
+      }
+      optimizeDeps.exclude = (optimizeDeps.exclude ?? []).filter((id: string | RegExp) => id !== 'reka-ui')
+      optimizeDeps.include = [...(optimizeDeps.include ?? []), 'reka-ui', 'reka-ui/namespaced']
+    }
+  },
+
   components: [
     { path: '~/components', pathPrefix: false }
   ],
