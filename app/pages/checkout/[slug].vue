@@ -6,6 +6,7 @@ import type {
   WebinarDetailResponse
 } from '#shared/types/catalog'
 import type { OrderEntityType } from '#shared/types/order'
+import { apiErrorCode } from '~/utils/apiErrorCode'
 import { useCheckout } from '~/composables/useCheckout'
 
 definePageMeta({
@@ -63,10 +64,7 @@ const { data, status, error, refresh } = await useApiFetch<DetailEnvelope>(
   () => detailUrl.value
 )
 
-const apiCode = computed(() => {
-  const raw = error.value as { code?: unknown } | null
-  return raw && typeof raw.code === 'string' ? raw.code : null
-})
+const apiCode = computed(() => apiErrorCode(error.value))
 
 if (apiCode.value === 'vl_lms_not_found') {
   throw createError({ statusCode: 404, statusMessage: 'Resource not found', fatal: true })

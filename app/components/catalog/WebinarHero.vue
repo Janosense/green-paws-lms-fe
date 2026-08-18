@@ -255,71 +255,89 @@ async function onCtaClick(): Promise<void> {
         >
           {{ dateLine }}
         </p>
-        <p
-          v-if="relativeLine"
-          class="text-sm text-muted"
-        >
-          {{ relativeLine }}
-        </p>
-        <div v-if="isPurchased">
-          <UBadge
-            color="success"
-            variant="subtle"
-            size="lg"
-            icon="i-lucide-check-circle"
+        <!-- Everything below is client-only: `/webinars/*` HTML comes from
+             an swr-cached anonymous SSR pass, so the relative-day line
+             (viewer's "today"), the registration-aware price/badge, and the
+             CTA state machine (auth + wall clock) would all bake stale or
+             guest state into the cache and mismatch on hydrate. The
+             fallback keeps the payload-derived price so nothing jumps. -->
+        <ClientOnly>
+          <p
+            v-if="relativeLine"
+            class="text-sm text-muted"
           >
-            {{ t('webinar.purchased') }}
-          </UBadge>
-        </div>
-        <p
-          v-else
-          class="text-2xl font-semibold"
-          :class="priceLabel.free ? 'text-muted' : 'text-default'"
-        >
-          {{ priceLabel.value }}
-        </p>
+            {{ relativeLine }}
+          </p>
+          <div v-if="isPurchased">
+            <UBadge
+              color="success"
+              variant="subtle"
+              size="lg"
+              icon="i-lucide-check-circle"
+            >
+              {{ t('webinar.purchased') }}
+            </UBadge>
+          </div>
+          <p
+            v-else
+            class="text-2xl font-semibold"
+            :class="priceLabel.free ? 'text-muted' : 'text-default'"
+          >
+            {{ priceLabel.value }}
+          </p>
 
-        <!-- Join / Recording use the dedicated redirect-aware buttons.
-             Everything else funnels through the unified `onCtaClick`. -->
-        <EventJoinButton
-          v-if="state.kind === 'registered_join_window'"
-          :redirect-path="`/vl/v1/webinars/${webinar.slug}/join`"
-          size="xl"
-        />
-        <EventRecordingButton
-          v-else-if="state.kind === 'registered_past_recording_available'"
-          :redirect-path="`/vl/v1/webinars/${webinar.slug}/recording`"
-          size="xl"
-        />
-        <UButton
-          v-else
-          color="primary"
-          size="xl"
-          :icon="ctaUi.icon"
-          :disabled="ctaUi.disabled"
-          :loading="ctaUi.loading"
-          @click="onCtaClick"
-        >
-          {{ ctaLabel }}
-        </UButton>
+          <!-- Join / Recording use the dedicated redirect-aware buttons.
+               Everything else funnels through the unified `onCtaClick`. -->
+          <EventJoinButton
+            v-if="state.kind === 'registered_join_window'"
+            :redirect-path="`/vl/v1/webinars/${webinar.slug}/join`"
+            size="xl"
+          />
+          <EventRecordingButton
+            v-else-if="state.kind === 'registered_past_recording_available'"
+            :redirect-path="`/vl/v1/webinars/${webinar.slug}/recording`"
+            size="xl"
+          />
+          <UButton
+            v-else
+            color="primary"
+            size="xl"
+            :icon="ctaUi.icon"
+            :disabled="ctaUi.disabled"
+            :loading="ctaUi.loading"
+            @click="onCtaClick"
+          >
+            {{ ctaLabel }}
+          </UButton>
 
-        <UButton
-          v-if="state.kind === 'registered_pending' || state.kind === 'registered_join_window' || state.kind === 'registered_past_recording_available'"
-          :to="`/dashboard/webinars/${webinar.slug}`"
-          color="neutral"
-          variant="ghost"
-          size="md"
-          icon="i-lucide-arrow-right"
-        >
-          {{ t('webinar.go_to_dashboard') }}
-        </UButton>
+          <UButton
+            v-if="state.kind === 'registered_pending' || state.kind === 'registered_join_window' || state.kind === 'registered_past_recording_available'"
+            :to="`/dashboard/webinars/${webinar.slug}`"
+            color="neutral"
+            variant="ghost"
+            size="md"
+            icon="i-lucide-arrow-right"
+          >
+            {{ t('webinar.go_to_dashboard') }}
+          </UButton>
 
-        <p
-          v-if="ctaUi.helperKey"
-          class="text-xs text-muted"
-        >
-          {{ t(ctaUi.helperKey) }}
-        </p>
+          <p
+            v-if="ctaUi.helperKey"
+            class="text-xs text-muted"
+          >
+            {{ t(ctaUi.helperKey) }}
+          </p>
+
+          <template #fallback>
+            <p
+              class="text-2xl font-semibold"
+              :class="priceLabel.free ? 'text-muted' : 'text-default'"
+            >
+              {{ priceLabel.value }}
+            </p>
+            <div class="h-12 w-48" />
+          </template>
+        </ClientOnly>
       </div>
     </div>
 

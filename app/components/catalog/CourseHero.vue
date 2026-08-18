@@ -11,9 +11,13 @@
 //   not yet open → disabled, with formatted opens-at hint
 //   ready        → POST /vl/v1/enrollments → toast + /dashboard
 //
-// The button SSR-renders so the page is interactive immediately. The
-// reactive flip from "guest/ready" to "enrolled" happens after hydrate;
-// a brief flash is accepted (DECISIONS.md note for Phase 4.2).
+// The price + CTA block renders client-only: `/courses/*` is served from
+// an swr-cached SSR pass that is deterministically anonymous (the refresh
+// cookie never reaches the Node server), so baking the guest CTA into the
+// cached HTML would guarantee a hydration mismatch for authed users. The
+// fallback shows the payload-derived price so the strip doesn't jump; the
+// brief post-mount flip to the real CTA state is accepted (DECISIONS.md
+// note for Phase 4.2).
 
 import type { CourseDetail } from '#shared/types/catalog'
 import { continueUrl } from '~/composables/useLearnNavigation'
@@ -305,33 +309,45 @@ async function runEnroll() {
       </div>
 
       <div class="space-y-3 pt-2">
-        <div v-if="isPurchased">
-          <UBadge
-            color="success"
-            variant="subtle"
-            size="lg"
-            icon="i-lucide-check-circle"
+        <ClientOnly>
+          <div v-if="isPurchased">
+            <UBadge
+              color="success"
+              variant="subtle"
+              size="lg"
+              icon="i-lucide-check-circle"
+            >
+              {{ t('enrollment.purchased') }}
+            </UBadge>
+          </div>
+          <p
+            v-else
+            class="text-2xl font-semibold"
+            :class="priceLabel.free ? 'text-muted' : 'text-default'"
           >
-            {{ t('enrollment.purchased') }}
-          </UBadge>
-        </div>
-        <p
-          v-else
-          class="text-2xl font-semibold"
-          :class="priceLabel.free ? 'text-muted' : 'text-default'"
-        >
-          {{ priceLabel.value }}
-        </p>
-        <UButton
-          :color="cta.color"
-          size="xl"
-          :disabled="cta.disabled"
-          :loading="isLoading"
-          icon="i-lucide-circle-plus"
-          @click="onCtaClick"
-        >
-          {{ cta.label }}
-        </UButton>
+            {{ priceLabel.value }}
+          </p>
+          <UButton
+            :color="cta.color"
+            size="xl"
+            :disabled="cta.disabled"
+            :loading="isLoading"
+            icon="i-lucide-circle-plus"
+            @click="onCtaClick"
+          >
+            {{ cta.label }}
+          </UButton>
+
+          <template #fallback>
+            <p
+              class="text-2xl font-semibold"
+              :class="priceLabel.free ? 'text-muted' : 'text-default'"
+            >
+              {{ priceLabel.value }}
+            </p>
+            <div class="h-12 w-48" />
+          </template>
+        </ClientOnly>
         <p
           v-if="secondaryLine"
           class="text-sm text-muted"

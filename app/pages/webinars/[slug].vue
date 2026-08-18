@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { WebinarDetailResponse } from '#shared/types/catalog'
+import { apiErrorCode } from '~/utils/apiErrorCode'
 import { buildBreadcrumbSchema } from '~/utils/buildBreadcrumbSchema'
 import { buildEventSchema } from '~/utils/buildEventSchema'
 
@@ -17,10 +18,7 @@ const { data, status, error, refresh } = await useApiFetch<WebinarDetailResponse
   () => `/vl/v1/catalog/webinars/${slug.value}`
 )
 
-const apiCode = computed(() => {
-  const raw = error.value as { code?: unknown } | null
-  return raw && typeof raw.code === 'string' ? raw.code : null
-})
+const apiCode = computed(() => apiErrorCode(error.value))
 
 if (apiCode.value === 'vl_lms_not_found') {
   throw createError({

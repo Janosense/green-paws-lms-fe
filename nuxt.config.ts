@@ -128,19 +128,27 @@ export default defineNuxtConfig({
     }
   },
 
-  // Public catalog (/courses/*, /webinars/*): client-only. Previously
-  // prerendered (and before that SWR-cached); switched to `ssr: false` to
-  // sidestep SSR limitations around the pages' client-side interactions.
-  // Trade-off: crawlers / OpenGraph bots get an SPA shell for catalog
-  // detail pages until prerender is re-enabled.
+  // Public catalog detail pages (/courses/*, /webinars/*): swr-cached SSR.
+  // The SSR pass is deterministically *anonymous* — the vl-jwt-auth refresh
+  // cookie is HttpOnly + path-scoped to the backend origin, so the Node
+  // server can never see it — which makes the rendered HTML user-independent
+  // and therefore cache-safe. Real content + OG/SEO tags ship in the first
+  // byte; every auth/time-dependent block in CourseHero/WebinarHero is
+  // wrapped in <ClientOnly> so the cached HTML can't mismatch on hydrate.
+  // (These pages were `ssr: false` for a while; the concrete breakage behind
+  // that switch — the host-timezone hydration mismatch — was fixed by
+  // app/utils/formatInSourceOffset.ts.) Keep the single-segment `*` pattern:
+  // the bare index route sharing a cache directory with per-slug payloads
+  // trips a Nitro fs-cache ENOTDIR collision in `nuxt preview` (see
+  // README troubleshooting).
   //
   // Authed surfaces are marked `ssr: false` so Nuxt ships a SPA shell and
-  // never tries to render them server-side. The vl-jwt-auth refresh cookie
-  // is HttpOnly + path-scoped to the *backend* origin, so a Node SSR pass
-  // can't see it cross-origin and would always render an "unauthenticated"
-  // shell — which then 302s to /login on hard reload before the browser
-  // gets to run the boot refresh. SPA mode sidesteps that entirely; the
-  // client-only `auth` middleware and `vl-auth` plugin do the real gate.
+  // never tries to render them server-side. The refresh cookie is invisible
+  // to the SSR pass (see above), which would always render an
+  // "unauthenticated" shell — and then 302 to /login on hard reload before
+  // the browser gets to run the boot refresh. SPA mode sidesteps that
+  // entirely; the client-only `auth` middleware and `vl-auth` plugin do the
+  // real gate.
   //
   // /verify-email and /reset-password are also SPA-only: their entire payload
   // is the `?token=…` query, but in same-origin production hosting the
@@ -149,8 +157,8 @@ export default defineNuxtConfig({
   // reliably override. Rendering on the client lets `window.location` —
   // which is authoritative — drive the page.
   routeRules: {
-    '/courses/*': { ssr: false },
-    '/webinars/*': { ssr: false },
+    '/courses/*': { swr: 300 },
+    '/webinars/*': { swr: 300 },
     '/verify-email': { ssr: false },
     '/reset-password': { ssr: false },
     '/account/**': { ssr: false },
@@ -163,7 +171,15 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      failOnError: false
+      failOnError: false,
+      // Catalog detail pages are swr-cached at runtime (routeRules above).
+      // Letting the crawler bake them into static HTML at build time would
+      // shadow the swr rule on Vercel (static assets win over the ISR
+      // function) and freeze every course/webinar page until the next
+      // deploy — the staleness that got `prerender: true` reverted in
+      // Phase 4. Prefix match, so the `/courses` & `/webinars` index pages
+      // themselves still prerender.
+      ignore: ['/courses/', '/webinars/']
     }
   },
 
