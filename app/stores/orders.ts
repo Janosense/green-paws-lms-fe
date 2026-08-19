@@ -84,7 +84,12 @@ export const useOrdersStore = defineStore('orders', () => {
     const api = useApi()
     status.value = 'loading'
     try {
-      const response = await api.get<OrdersListResponse>('/vl/v1/orders/me')
+      // `authRedirect: false`: this list is boot-prefetched in the background,
+      // so a dead session here must not yank the user to /login mid-browse.
+      const response = await api.get<OrdersListResponse>(
+        '/vl/v1/orders/me',
+        { authRedirect: false }
+      )
       items.value = Array.isArray(response?.items) ? response.items : []
       status.value = 'success'
       error.value = null

@@ -57,8 +57,11 @@ export const useWebinarRegistrationsStore = defineStore('webinar-registrations',
     const api = useApi()
     status.value = 'loading'
     try {
+      // `authRedirect: false`: this list is boot-prefetched in the background,
+      // so a dead session here must not yank the user to /login mid-browse.
       const response = await api.get<WebinarRegistrationsListResponse>(
-        '/vl/v1/webinars/me?status=active&time_filter=all'
+        '/vl/v1/webinars/me?status=active&time_filter=all',
+        { authRedirect: false }
       )
       items.value = Array.isArray(response?.registrations) ? response.registrations : []
       status.value = 'success'

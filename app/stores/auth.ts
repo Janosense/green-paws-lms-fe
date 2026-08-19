@@ -95,7 +95,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe(): Promise<User> {
     const api = useApi()
-    const response = await api.get<ApiEnvelope<User>>('/vl-auth/v1/me')
+    // `authRedirect: false`: fired fire-and-forget from the boot plugin, so
+    // a raced token expiry here must not redirect the user to /login.
+    const response = await api.get<ApiEnvelope<User>>(
+      '/vl-auth/v1/me',
+      { authRedirect: false }
+    )
     user.value = response.data
     return response.data
   }

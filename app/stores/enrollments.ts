@@ -53,7 +53,12 @@ export const useEnrollmentsStore = defineStore('enrollments', () => {
     const api = useApi()
     status.value = 'loading'
     try {
-      const response = await api.get<EnrollmentsListResponse>('/vl/v1/enrollments/me')
+      // `authRedirect: false`: this list is boot-prefetched in the background,
+      // so a dead session here must not yank the user to /login mid-browse.
+      const response = await api.get<EnrollmentsListResponse>(
+        '/vl/v1/enrollments/me',
+        { authRedirect: false }
+      )
       items.value = Array.isArray(response?.data?.items) ? response.data.items : []
       status.value = 'success'
       error.value = null

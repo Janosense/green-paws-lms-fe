@@ -63,7 +63,12 @@ export const useCertificatesStore = defineStore('certificates', () => {
     const api = useApi()
     status.value = 'loading'
     try {
-      const response = await api.get<CertificatesListResponse>('/vl/v1/certificates/me')
+      // `authRedirect: false`: this list is boot-prefetched in the background,
+      // so a dead session here must not yank the user to /login mid-browse.
+      const response = await api.get<CertificatesListResponse>(
+        '/vl/v1/certificates/me',
+        { authRedirect: false }
+      )
       items.value = Array.isArray(response?.data?.items) ? response.data.items : []
       status.value = 'ready'
       error.value = null

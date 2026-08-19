@@ -6,11 +6,16 @@ import type { ApiError } from '#shared/types/api'
  * Internal extension over Nitro's fetch options:
  * - `auth: false` opts a request out of `Authorization: Bearer` injection
  *   (used by /vl-auth/v1/token, /token/refresh, /vl/v1/auth/* public flows).
+ * - `authRedirect: false` keeps a failed refresh from redirecting to /login
+ *   (used by the fire-and-forget boot prefetches: a dead session discovered
+ *   by a background fetch while the user browses a public page must not
+ *   hijack their navigation).
  * - `__retried: true` is the sentinel that marks the second pass after a
  *   refresh-and-retry, so a recursive 401 does not loop.
  */
 type ApiFetchOptions = NitroFetchOptions<NitroFetchRequest> & {
   auth?: boolean
+  authRedirect?: boolean
   __retried?: boolean
 }
 type ApiCallOptions = Omit<ApiFetchOptions, 'method'>
@@ -115,9 +120,10 @@ function buildApiFetchOptions(): SharedApiFetchOptions {
         }
       }
 
-      // `auth` and `__retried` are wrapper-internal flags — strip them so
+      // `auth` / `authRedirect` are wrapper-internal flags — strip them so
       // they never reach the underlying Fetch call.
       delete opts.auth
+      delete opts.authRedirect
     },
 
     onRequestError(ctx) {
@@ -144,6 +150,12 @@ type ApiClientFetch = <T>(request: NitroFetchRequest, options?: ApiFetchOptions)
  * inside the interceptor itself. The shared interceptor still normalizes
  * the error; we only inspect its status here.
  */
+// Single-flight guard for the refresh-failure redirect below. Without it a
+// burst of concurrent 401s (e.g. the four boot prefetches hitting a dead
+// session at once) fires one router.push('/login') per failed request — a
+// redirect storm that cancels whatever navigation the user just started.
+let loginRedirectInFlight = false
+
 function createApiFetch(): ApiClientFetch {
   const baseFetch = $fetch.create(buildApiFetchOptions())
 
@@ -167,10 +179,17 @@ function createApiFetch(): ApiClientFetch {
       } catch {
         // Refresh failed: the store has cleared its own state. Surface the
         // original 401 to the caller and, on the client, kick the user back
-        // to /login. SSR has no router redirect target here — the page
+        // to /login — unless the caller opted out via `authRedirect: false`
+        // (background prefetches) or another failed request already started
+        // the redirect. SSR has no router redirect target here — the page
         // render will surface the auth-less state via the boot plugin.
-        if (import.meta.client) {
-          await navigateTo('/login')
+        if (import.meta.client && options.authRedirect !== false && !loginRedirectInFlight) {
+          loginRedirectInFlight = true
+          try {
+            await navigateTo('/login')
+          } finally {
+            loginRedirectInFlight = false
+          }
         }
         throw error
       }
