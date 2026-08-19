@@ -9,6 +9,12 @@ interface Props {
 
 const { course } = defineProps<Props>()
 const { t } = useI18n()
+const enrollmentsStore = useEnrollmentsStore()
+
+// Empty during SSR and at hydration (the store is boot-prefetched
+// client-side only), so the bar pops in reactively once the list lands —
+// same pattern as the CourseHero CTA flip.
+const enrollment = computed(() => enrollmentsStore.getEnrollment(course.id))
 
 const firstCategory = computed(() => course.categories[0] ?? null)
 const initial = computed(() => course.title.trim().charAt(0).toUpperCase())
@@ -51,6 +57,21 @@ const priceLabel = computed(() => {
     <h3 class="text-base font-medium leading-snug line-clamp-2 group-hover:text-primary">
       {{ course.title }}
     </h3>
+
+    <div
+      v-if="enrollment"
+      class="space-y-1"
+    >
+      <p class="text-right text-xs text-muted tabular-nums">
+        {{ enrollment.progress_pct }}%
+      </p>
+      <UProgress
+        :model-value="enrollment.progress_pct"
+        :max="100"
+        size="sm"
+        color="primary"
+      />
+    </div>
 
     <div
       v-if="course.lead_instructor"
