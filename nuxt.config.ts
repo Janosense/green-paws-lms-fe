@@ -177,9 +177,17 @@ export default defineNuxtConfig({
       // shadow the swr rule on Vercel (static assets win over the ISR
       // function) and freeze every course/webinar page until the next
       // deploy — the staleness that got `prerender: true` reverted in
-      // Phase 4. Prefix match, so the `/courses` & `/webinars` index pages
-      // themselves still prerender.
-      ignore: ['/courses/', '/webinars/']
+      // Phase 4. The `/courses` & `/webinars` index pages themselves still
+      // prerender, and the negative lookahead is load-bearing: the index
+      // pages' extracted payloads are prerendered as sub-routes named
+      // `/courses/_payload.json` / `/webinars/_payload.json`, which a plain
+      // prefix ignore would also drop. That leaves the prerendered HTML
+      // pointing its `__NUXT_DATA__` data-src at a file that doesn't exist,
+      // hydration falls back to a fresh runtime payload, and the stale
+      // build-time markup mismatches it ("Hydration completed but contains
+      // mismatches") — it also silently removes /courses and /webinars from
+      // the app manifest's `prerendered` list.
+      ignore: [/^\/courses\/(?!_payload\.json$)/, /^\/webinars\/(?!_payload\.json$)/]
     }
   },
 
