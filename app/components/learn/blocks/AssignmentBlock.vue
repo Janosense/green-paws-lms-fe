@@ -50,20 +50,20 @@ const props = defineProps<{
   config?: AssignmentConfig
 }>()
 
-type State =
-  | 'loading'
-  | 'idle'
-  | 'submitting'
-  | 'submitted_pending'
-  | 'graded_pass'
-  | 'graded_fail'
-  | 'rejected'
-  | 'error'
+type State
+  = | 'loading'
+    | 'idle'
+    | 'submitting'
+    | 'submitted_pending'
+    | 'graded_pass'
+    | 'graded_fail'
+    | 'rejected'
+    | 'error'
 
 const { t } = useI18n()
 const api = useApi()
 const authStore = useAuthStore()
-const config = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig()
 
 const state = ref<State>('loading')
 const submission = ref<SubmissionPayload | null>(null)
@@ -112,7 +112,7 @@ async function loadMine(): Promise<void> {
 }
 
 async function uploadFile(picked: File): Promise<{ url: string, name: string }> {
-  const baseURL = config.public.wpApiBase as string
+  const baseURL = runtimeConfig.public.wpApiBase as string
   const url = `${baseURL.replace(/\/$/, '')}/wp/v2/media`
   const headers: Record<string, string> = {
     'Content-Disposition': `attachment; filename="${picked.name}"`,
