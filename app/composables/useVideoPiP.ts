@@ -29,7 +29,12 @@ export function useVideoPiP(videoRef: Ref<HTMLElement | null>): {
   }
 
   if (import.meta.server) {
-    return { isPipActive, dismiss: () => { pipDismissed.value = true } }
+    return {
+      isPipActive,
+      dismiss: () => {
+        pipDismissed.value = true
+      }
+    }
   }
 
   const isInViewport = useElementVisibility(videoRef)
