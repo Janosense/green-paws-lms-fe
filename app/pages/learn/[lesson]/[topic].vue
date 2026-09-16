@@ -109,6 +109,17 @@ const tracker = initialTopic
     })
   : null
 
+// study-time Sprint 1 Step 6 — the feature's only wiring in this page
+// (frontend/CLAUDE.md). Same adapter ref as the tracker, same setup-time
+// guard; the composable is a no-op in preview and holds no interval of its own.
+if (initialTopic) {
+  useStudyTimeHeartbeat({
+    entityType: 'topic',
+    entityId: initialTopic.id,
+    videoAdapter: videoAdapterRef
+  })
+}
+
 const isCompleted = computed(() => {
   if (tracker) return tracker.completed.value
   return topic.value?.progress.status === 'completed'
