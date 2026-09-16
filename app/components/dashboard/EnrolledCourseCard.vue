@@ -5,9 +5,11 @@ import { resolveEnrollmentError } from '~/utils/resolveEnrollmentError'
 
 interface Props {
   enrollment: EnrollmentRecord
+  /** Study-time total for this course, in seconds (feature `study-time`). */
+  studySeconds?: number
 }
 
-const { enrollment } = defineProps<Props>()
+const { enrollment, studySeconds = 0 } = defineProps<Props>()
 const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
@@ -20,6 +22,16 @@ const coursePath = computed(() => `/courses/${enrollment.course.slug}`)
 const titleInitial = computed(() => enrollment.course.title.trim().charAt(0).toUpperCase())
 
 const isCompleted = computed(() => enrollment.status === 'completed')
+
+// study-time Sprint 2 Step 5. The formatter returns '' for zero, so an
+// empty string is how "nothing recorded yet" hides the whole line.
+const studyTimeLabel = computed(() => {
+  const duration = formatStudyDuration(studySeconds, {
+    hours: t('landing.duration.hours_short'),
+    minutes: t('landing.duration.minutes_short')
+  })
+  return duration === '' ? '' : t('enrollment.stats.study_time', { duration })
+})
 
 const ctaLabel = computed(() =>
   isCompleted.value
@@ -177,6 +189,13 @@ async function onConfirmReset(): Promise<void> {
           <span class="text-xs text-muted">{{ enrollment.progress_pct }}%</span>
         </template>
       </UProgress>
+
+      <p
+        v-if="studyTimeLabel"
+        class="text-xs text-muted"
+      >
+        {{ studyTimeLabel }}
+      </p>
 
       <UButton
         color="primary"

@@ -137,7 +137,8 @@
       "lessons": "Уроки",
       "topics": "Теми",
       "quizzes": "Тести",
-      "final_exam": "Підсумковий тест"
+      "final_exam": "Підсумковий тест",
+      "study_time": "Ви провели в курсі {duration}"
     },
     "actions": {
       "continue": "Продовжити",

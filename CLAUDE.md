@@ -4,7 +4,11 @@ The Nuxt 4 app, the only user-facing surface of Green Paws LMS, and a multi-feat
 
 ## Feature isolation
 - `core` owns everything in `frontend/` except `study-time`'s files.
-- `study-time` owns `app/composables/useStudyTimeHeartbeat.ts`. It has no bootstrap: its only wiring in `core` is one import + one call in each of `app/pages/learn/[lesson]/index.vue` and `app/pages/learn/[lesson]/[topic].vue`, next to `useProgressTracker` (`docs/DECISIONS.md` 2026-09-15).
+- `study-time` owns three files: `app/composables/useStudyTimeHeartbeat.ts` (the player heartbeat), `app/composables/useStudyTimeSummary.ts` (the learner's own totals from `GET /vl/v1/study-time/me`) and `app/utils/formatStudyDuration.ts` (seconds → «12 год 05 хв»; the seconds-side sibling of `core`'s hours-based `formatDuration.ts`, which it must never replace). It has no bootstrap. Its wiring in `core` is one call per place:
+  - `app/pages/learn/[lesson]/index.vue` and `[topic].vue` — the heartbeat, next to `useProgressTracker` (`docs/DECISIONS.md` 2026-09-15);
+  - `app/pages/dashboard/index.vue` — the summary, plus one prop passed to the card;
+  - `app/components/dashboard/EnrolledCourseCard.vue` — one optional `studySeconds` prop and the line it renders;
+  - `i18n/locales/uk.json` — the string `enrollment.stats.study_time`.
 - Shared code (`app/composables/useApi.ts`, `app/composables/useLessonPreview.ts`, `app/lib/video/*`, pages, components, stores, `i18n/locales/uk.json`, `nuxt.config.ts`, `package.json` and the tool configs) changes ONLY in an explicit plan task marked **"touches shared code — may affect other features"** that names the consuming features.
 - `study-time` reaches `core` only through:
   - `useApi()` (never a raw `$fetch`)

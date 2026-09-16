@@ -28,6 +28,14 @@ if (!enrollments.initialized) {
   void enrollments.refresh()
 }
 
+// study-time Sprint 2 Step 5 — the feature's only wiring on this page
+// (frontend/CLAUDE.md): one read per dashboard load, keyed by course id.
+// Never awaited: a card without its time line still renders everything else.
+const { secondsByCourse: studySeconds, load: loadStudyTime } = useStudyTimeSummary()
+onMounted(() => {
+  void loadStudyTime()
+})
+
 const isInitialLoading = computed(() =>
   !enrollments.initialized && enrollments.status === 'loading'
 )
@@ -93,6 +101,7 @@ const showGrid = computed(() => enrollments.items.length > 0)
           v-for="enrollment in enrollments.items"
           :key="enrollment.id"
           :enrollment="enrollment"
+          :study-seconds="studySeconds[enrollment.course.id] ?? 0"
         />
       </div>
     </div>
