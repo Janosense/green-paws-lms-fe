@@ -246,20 +246,24 @@ export function neighborsByQuizSlug(
  * Once any progress exists, prefer the server-computed `next_entity`
  * hint (Phase 5.2 + 7.4 session arm) so the learner resumes exactly
  * where they left off. Falls back to the first non-completed leaf when
- * the hint is unexpectedly absent; returns null when nothing remains.
+ * the hint is unexpectedly absent.
+ *
+ * When nothing remains — a finished course — the first open leaf is
+ * returned again, so "Review" opens the course from its start instead of
+ * leaving the caller without a player URL. Returns null only when the
+ * curriculum has no open leaf at all.
  */
 export function continueUrl(curriculum: CurriculumResponse): string | null {
   const leaves = flattenCurriculum(curriculum)
 
+  // Normally leaves[0], but a course whose very first quiz gates the rest
+  // can have a locked opening leaf — deep-linking into it would land the
+  // learner on a 403.
+  const firstOpen = leaves.find(leaf => !isLeafLocked(leaf))
+
   const notStarted = (curriculum.course.enrollment?.progress_pct ?? 0) === 0
-  if (notStarted) {
-    // Normally leaves[0], but a course whose very first quiz gates the rest
-    // can have a locked opening leaf — deep-linking into it would land the
-    // learner on a 403.
-    const firstOpen = leaves.find(leaf => !isLeafLocked(leaf))
-    if (firstOpen) {
-      return leafToPath(firstOpen)
-    }
+  if (notStarted && firstOpen) {
+    return leafToPath(firstOpen)
   }
 
   const hint = curriculum.next_entity
@@ -296,7 +300,10 @@ export function continueUrl(curriculum: CurriculumResponse): string | null {
         return leaf.quiz.status !== 'passed'
     }
   })
-  return next ? leafToPath(next) : null
+  if (next) {
+    return leafToPath(next)
+  }
+  return firstOpen ? leafToPath(firstOpen) : null
 }
 
 function matchesHint(leaf: LearnLeaf, hint: NonNullable<CurriculumResponse['next_entity']>): boolean {
